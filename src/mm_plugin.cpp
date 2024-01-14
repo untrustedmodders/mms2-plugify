@@ -13,10 +13,10 @@
  */
 
 #include <stdio.h>
-#include <iserver.h>
-#include <wizard/wizard.h>
 #include "mm_plugin.h"
 #include "mm_logger.h"
+#include <iserver.h>
+#include <wizard/wizard.h>
 
 namespace wizard {
 
