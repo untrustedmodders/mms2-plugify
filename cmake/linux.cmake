@@ -19,7 +19,5 @@ SET(WIZARD_LINK_LIBRARIES
 	${SOURCESDK_LIB}/linux64/tier1.a
 	${SOURCESDK_LIB}/linux64/interfaces.a
 	${SOURCESDK_LIB}/linux64/mathlib.a
-	curl
-	miniz
-	$<TARGET_OBJECTS:wizard>
+	wizard
 )

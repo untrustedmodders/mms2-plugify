@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <mm_plugin.h>
 #include <iserver.h>
+#include <wizard/wizard.h>
 
 namespace wizard {
 
@@ -87,6 +88,8 @@ bool WizardMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen
 	g_pCVar = icvar;
 	ConVar_Register(FCVAR_RELEASE | FCVAR_CLIENT_CAN_EXECUTE | FCVAR_GAMEDLL);
 
+	_context = wizard::MakeWizard();
+
 	return true;
 }
 
@@ -99,6 +102,8 @@ bool WizardMMPlugin::Unload(char* error, size_t maxlen) {
 	SH_REMOVE_HOOK(IServerGameClients, OnClientConnected, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_OnClientConnected), false);
 	SH_REMOVE_HOOK(IServerGameClients, ClientConnect, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientConnect), false);
 	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientCommand), false);
+
+	_context.reset();
 
 	return true;
 }

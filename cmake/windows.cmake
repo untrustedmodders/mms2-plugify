@@ -13,7 +13,5 @@ set(WIZARD_LINK_LIBRARIES
     ${SOURCESDK_LIB}/public/win64/tier1.lib
     ${SOURCESDK_LIB}/public/win64/interfaces.lib
     ${SOURCESDK_LIB}/public/win64/mathlib.lib
-    winhttp.lib
-    miniz
-    $<TARGET_OBJECTS:wizard>
+    wizard
 )

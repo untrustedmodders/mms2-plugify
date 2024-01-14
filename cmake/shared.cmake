@@ -54,7 +54,6 @@ include_directories(
     ${METAMOD_DIR}/core
     ${METAMOD_DIR}/core/sourcehook
     external/wizard/include
-    external/wizard/src
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/metamod/configure_metamod.cmake)
