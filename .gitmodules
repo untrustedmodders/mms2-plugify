@@ -1,0 +1,10 @@
+[submodule "external/wizard"]
+	path = external/wizard
+	url = https://github.com/untrustedmodders/wizard
+[submodule "external/metamod-source"]
+	path = external/metamod-source
+	url = https://github.com/alliedmodders/metamod-source
+[submodule "external/hl2sdk-cs2"]
+	path = external/hl2sdk-cs2
+	url = https://github.com/alliedmodders/hl2sdk
+	branch = cs2
