@@ -178,8 +178,7 @@ const char* WizardMMPlugin::GetLicense() {
 }
 
 const char* WizardMMPlugin::GetVersion() {
-	#define STR(x) #x
-	return "." STR(WIZARD_VERSION_MAJOR) "." STR(WIZARD_VERSION_MINOR) "." STR(WIZARD_VERSION_PATCH) "." STR(WIZARD_VERSION_TWEAK);
+	return "1.0.0.0";
 }
 
 const char* WizardMMPlugin::GetDate() {

@@ -63,7 +63,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cs2_sdk
 )
 
-if (LINUX)
+if(LINUX)
     include("cmake/linux.cmake")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         PREFIX ""
