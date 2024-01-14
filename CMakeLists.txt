@@ -11,7 +11,7 @@ set(WIZARD_BUILD_DLL OFF CACHE INTERNAL "")
 set(WIZARD_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
 set(WIZARD_BUILD_TESTS OFF CACHE INTERNAL "")
 add_subdirectory(external/wizard)
-target_compile_definitions(wizard PRIVATE wizard_EXPORTS)
+target_compile_definitions(wizard PRIVATE wizard_EXPORTS) # we should export
 
 include("cmake/shared.cmake")
 

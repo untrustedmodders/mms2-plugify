@@ -20,8 +20,6 @@ SET(WIZARD_LINK_LIBRARIES
 	${SOURCESDK_LIB}/linux64/interfaces.a
 	${SOURCESDK_LIB}/linux64/mathlib.a
 	curl
-	glaze_glaze
-	picosha2
 	miniz
 	$<TARGET_OBJECTS:wizard>
 )
