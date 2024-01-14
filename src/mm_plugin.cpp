@@ -13,9 +13,10 @@
  */
 
 #include <stdio.h>
-#include <mm_plugin.h>
 #include <iserver.h>
 #include <wizard/wizard.h>
+#include "mm_plugin.h"
+#include "mm_logger.h"
 
 namespace wizard {
 
@@ -88,7 +89,11 @@ bool WizardMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen
 	g_pCVar = icvar;
 	ConVar_Register(FCVAR_RELEASE | FCVAR_CLIENT_CAN_EXECUTE | FCVAR_GAMEDLL);
 
-	_context = wizard::MakeWizard();
+	_context = MakeWizard();
+
+	auto logger = std::make_shared<MMLogger>();
+	logger->SetSeverity(Severity::Debug);
+	_context->SetLogger(std::move(logger));
 
 	return true;
 }
@@ -194,7 +199,7 @@ const char* WizardMMPlugin::GetDescription() {
 }
 
 const char* WizardMMPlugin::GetName() {
-	return "CS2 Wizard Core";
+	return "CS2 Wizard";
 }
 
 const char* WizardMMPlugin::GetURL() {
