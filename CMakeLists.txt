@@ -7,8 +7,9 @@ endif()
 
 project(cs2wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES "CXX")
 
-set(WIZARD_BUILD_DLL OFF CACHE INTERNAL "")
+set(WIZARD_BUILD_DLL ON CACHE INTERNAL "")
 set(WIZARD_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
+set(WIZARD_BUILD_TESTS OFF CACHE INTERNAL "")
 add_subdirectory(external/wizard)
 
 include("cmake/shared.cmake")
