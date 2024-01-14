@@ -29,8 +29,8 @@ endif()
 
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
-set(SOURCESDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libraries/hl2sdk-cs2)
-set(METAMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libraries/metamod-source)
+set(SOURCESDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2)
+set(METAMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/metamod-source)
 
 set(SOURCESDK ${SOURCESDK_DIR}/${BRANCH})
 set(SOURCESDK_LIB ${SOURCESDK}/lib)
@@ -53,7 +53,8 @@ include_directories(
     ${SOURCESDK}/public/entity2
     ${METAMOD_DIR}/core
     ${METAMOD_DIR}/core/sourcehook
-    libraries/wizard/include
+    external/wizard/include
+    external/wizard/src
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/metamod/configure_metamod.cmake)
