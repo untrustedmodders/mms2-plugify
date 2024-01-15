@@ -4,6 +4,7 @@ if(POLICY CMP0092)
     cmake_policy(SET CMP0092 NEW) # Don't add -W3 warning level by default.
 endif()
 
+
 project(cs2wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES C CXX ASM)
 
 set(WIZARD_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
@@ -60,7 +61,6 @@ elseif(WIN32)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
     )
 endif()
-
 
 # Libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE ${WIZARD_LINK_LIBRARIES})
