@@ -15,194 +15,96 @@
 #include <stdio.h>
 #include "mm_plugin.h"
 #include "mm_logger.h"
+#include <igameevents.h>
 #include <iserver.h>
 #include <wizard/wizard.h>
+#include <filesystem>
 
-namespace wizard {
+namespace cs2wizard {
+	IServerGameDLL* server = NULL;
+	IServerGameClients* gameclients = NULL;
+	IVEngineServer* engine = NULL;
+	IGameEventManager2* gameevents = NULL;
+	ICvar* icvar = NULL;
 
-SH_DECL_HOOK3_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool, bool, bool);
-SH_DECL_HOOK4_void(IServerGameClients, ClientActive, SH_NOATTRIB, 0, CPlayerSlot, bool, const char *, uint64);
-SH_DECL_HOOK5_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0, CPlayerSlot, ENetworkDisconnectionReason, const char *, uint64, const char *);
-SH_DECL_HOOK4_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0, CPlayerSlot, char const *, int, uint64);
-SH_DECL_HOOK1_void(IServerGameClients, ClientSettingsChanged, SH_NOATTRIB, 0, CPlayerSlot );
-SH_DECL_HOOK6_void(IServerGameClients, OnClientConnected, SH_NOATTRIB, 0, CPlayerSlot, const char*, uint64, const char *, const char *, bool);
-SH_DECL_HOOK6(IServerGameClients, ClientConnect, SH_NOATTRIB, 0, bool, CPlayerSlot, const char*, uint64, const char *, bool, CBufferString *);
-SH_DECL_HOOK2(IGameEventManager2, FireEvent, SH_NOATTRIB, 0, bool, IGameEvent *, bool);
+	WizardMMPlugin g_Plugin;
+	PLUGIN_EXPOSE(WizardMMPlugin, g_Plugin);
 
-SH_DECL_HOOK2_void( IServerGameClients, ClientCommand, SH_NOATTRIB, 0, CPlayerSlot, const CCommand & );
+	CON_COMMAND_F(wizard, "Wizard control options", FCVAR_NONE) {
+		META_CONPRINTF("Sample command called by %d. Command: %s\n", context.GetPlayerSlot(), args.GetCommandString());
+	}
 
-WizardMMPlugin g_Plugin;
-IServerGameDLL* server = NULL;
-IServerGameClients* gameclients = NULL;
-IVEngineServer* engine = NULL;
-IGameEventManager2* gameevents = NULL;
-ICvar* icvar = NULL;
+	bool WizardMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) {
+		PLUGIN_SAVEVARS();
 
-// Should only be called within the active game loop (i e map should be loaded and active)
-// otherwise that'll be nullptr!
-CGlobalVars* GetGameGlobals() {
-	INetworkGameServer* server = g_pNetworkServerService->GetIGameServer();
-	if (!server)
-		return nullptr;
-	return g_pNetworkServerService->GetIGameServer()->GetGlobals();
-}
+		GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
+		GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
+		GET_V_IFACE_ANY(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
+		GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
+		GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
 
-#if 0
-// Currently unavailable, requires hl2sdk work!
-ConVar sample_cvar("sample_cvar", "42", 0);
-#endif
+		//g_SMAPI->AddListener(this, this);
 
-CON_COMMAND_F(sample_command, "Sample command", FCVAR_NONE) {
-	META_CONPRINTF("Sample command called by %d. Command: %s\n", context.GetPlayerSlot(), args.GetCommandString());
-}
+		g_pCVar = icvar;
+		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
 
-PLUGIN_EXPOSE(WizardMMPlugin, g_Plugin);
+		_context = wizard::MakeWizard();
 
-bool WizardMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) {
-	PLUGIN_SAVEVARS();
+		auto logger = std::make_shared<MMLogger>();
+		logger->SetSeverity(wizard::Severity::Info);
+		_context->SetLogger(std::move(logger));
 
-	GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
-	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
-	GET_V_IFACE_ANY(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
-	GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
-	GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+		return _context->Initialize(Plat_GetGameDirectory());
+	}
 
-	// Currently doesn't work from within mm side, use GetGameGlobals() in the mean time instead
-	// gpGlobals = ismm->GetCGlobals();
+	bool WizardMMPlugin::Unload(char* error, size_t maxlen) {
 
-	// Required to get the IMetamodListener events
-	g_SMAPI->AddListener(this, this);
+		_context.reset();
 
-	META_CONPRINTF("Starting plugin.\n");
+		return true;
+	}
 
-	SH_ADD_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &WizardMMPlugin::Hook_GameFrame), true);
-	SH_ADD_HOOK(IServerGameClients, ClientActive, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientActive), true);
-	SH_ADD_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientDisconnect), true);
-	SH_ADD_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientPutInServer), true);
-	SH_ADD_HOOK(IServerGameClients, ClientSettingsChanged, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientSettingsChanged), false);
-	SH_ADD_HOOK(IServerGameClients, OnClientConnected, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_OnClientConnected), false);
-	SH_ADD_HOOK(IServerGameClients, ClientConnect, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientConnect), false);
-	SH_ADD_HOOK(IServerGameClients, ClientCommand, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientCommand), false);
+	void WizardMMPlugin::AllPluginsLoaded() {
+	}
 
-	META_CONPRINTF("All hooks started!\n");
+	bool WizardMMPlugin::Pause(char* error, size_t maxlen) {
+		return true;
+	}
 
-	g_pCVar = icvar;
-	ConVar_Register(FCVAR_RELEASE | FCVAR_CLIENT_CAN_EXECUTE | FCVAR_GAMEDLL);
+	bool WizardMMPlugin::Unpause(char* error, size_t maxlen) {
+		return true;
+	}
 
-	_context = MakeWizard();
+	const char* WizardMMPlugin::GetLicense() {
+		return "Public Domain";
+	}
 
-	auto logger = std::make_shared<MMLogger>();
-	logger->SetSeverity(Severity::Debug);
-	_context->SetLogger(std::move(logger));
+	const char* WizardMMPlugin::GetVersion() {
+		return "1.0.0.0";
+	}
 
-	return true;
-}
+	const char* WizardMMPlugin::GetDate() {
+		return __DATE__;
+	}
 
-bool WizardMMPlugin::Unload(char* error, size_t maxlen) {
-	SH_REMOVE_HOOK(IServerGameDLL, GameFrame, server, SH_MEMBER(this, &WizardMMPlugin::Hook_GameFrame), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientActive, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientActive), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientDisconnect, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientDisconnect), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientPutInServer, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientPutInServer), true);
-	SH_REMOVE_HOOK(IServerGameClients, ClientSettingsChanged, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientSettingsChanged), false);
-	SH_REMOVE_HOOK(IServerGameClients, OnClientConnected, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_OnClientConnected), false);
-	SH_REMOVE_HOOK(IServerGameClients, ClientConnect, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientConnect), false);
-	SH_REMOVE_HOOK(IServerGameClients, ClientCommand, gameclients, SH_MEMBER(this, &WizardMMPlugin::Hook_ClientCommand), false);
+	const char* WizardMMPlugin::GetLogTag() {
+		return "WIZARD";
+	}
 
-	_context.reset();
+	const char* WizardMMPlugin::GetAuthor() {
+		return "untrustedmodders";
+	}
 
-	return true;
-}
+	const char* WizardMMPlugin::GetDescription() {
+		return "Package & Plugin Manager";
+	}
 
-void WizardMMPlugin::AllPluginsLoaded() {
-	/* This is where we'd do stuff that relies on the mod or other plugins
-	 * being initialized (for example, cvars added and events registered).
-	 */
-}
+	const char* WizardMMPlugin::GetName() {
+		return "CS2 Wizard";
+	}
 
-void WizardMMPlugin::Hook_ClientActive(CPlayerSlot slot, bool bLoadGame, const char* pszName, uint64 xuid) {
-	META_CONPRINTF("Hook_ClientActive(%d, %d, \"%s\", %d)\n", slot, bLoadGame, pszName, xuid);
-}
-
-void WizardMMPlugin::Hook_ClientCommand(CPlayerSlot slot, const CCommand& args) {
-	META_CONPRINTF("Hook_ClientCommand(%d, \"%s\")\n", slot, args.GetCommandString());
-}
-
-void WizardMMPlugin::Hook_ClientSettingsChanged(CPlayerSlot slot) {
-	META_CONPRINTF("Hook_ClientSettingsChanged(%d)\n", slot);
-}
-
-void WizardMMPlugin::Hook_OnClientConnected(CPlayerSlot slot, const char* pszName, uint64 xuid, const char* pszNetworkID, const char* pszAddress, bool bFakePlayer) {
-	META_CONPRINTF("Hook_OnClientConnected(%d, \"%s\", %d, \"%s\", \"%s\", %d)\n", slot, pszName, xuid, pszNetworkID, pszAddress, bFakePlayer);
-}
-
-bool WizardMMPlugin::Hook_ClientConnect(CPlayerSlot slot, const char* pszName, uint64 xuid, const char* pszNetworkID, bool unk1, CBufferString* pRejectReason) {
-	META_CONPRINTF("Hook_ClientConnect(%d, \"%s\", %d, \"%s\", %d, \"%s\")\n", slot, pszName, xuid, pszNetworkID, unk1, pRejectReason->ToGrowable()->Get());
-	RETURN_META_VALUE(MRES_IGNORED, true);
-}
-
-void WizardMMPlugin::Hook_ClientPutInServer(CPlayerSlot slot, char const* pszName, int type, uint64 xuid) {
-	META_CONPRINTF("Hook_ClientPutInServer(%d, \"%s\", %d, %d)\n", slot, pszName, type, xuid);
-}
-
-void WizardMMPlugin::Hook_ClientDisconnect(CPlayerSlot slot, ENetworkDisconnectionReason reason, const char* pszName, uint64 xuid, const char* pszNetworkID) {
-	META_CONPRINTF("Hook_ClientDisconnect(%d, %d, \"%s\", %d, \"%s\")\n", slot, reason, pszName, xuid, pszNetworkID);
-}
-
-void WizardMMPlugin::Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick) {
-	/**
-	 * simulating:
-	 * ***********
-	 * true  | game is ticking
-	 * false | game is not ticking
-	 */
-}
-
-void WizardMMPlugin::OnLevelInit(char const* pMapName, char const* pMapEntities, char const* pOldLevel, char const* pLandmarkName, bool loadGame, bool background) {
-	META_CONPRINTF("OnLevelInit(%s)\n", pMapName);
-}
-
-void WizardMMPlugin::OnLevelShutdown() {
-	META_CONPRINTF("OnLevelShutdown()\n");
-}
-
-bool WizardMMPlugin::Pause(char* error, size_t maxlen) {
-	return true;
-}
-
-bool WizardMMPlugin::Unpause(char* error, size_t maxlen) {
-	return true;
-}
-
-const char* WizardMMPlugin::GetLicense() {
-	return "Public Domain";
-}
-
-const char* WizardMMPlugin::GetVersion() {
-	return "1.0.0.0";
-}
-
-const char* WizardMMPlugin::GetDate() {
-	return __DATE__;
-}
-
-const char* WizardMMPlugin::GetLogTag() {
-	return "WIZARD";
-}
-
-const char* WizardMMPlugin::GetAuthor() {
-	return "untrustedmodders";
-}
-
-const char* WizardMMPlugin::GetDescription() {
-	return "Package & Plugin Manager";
-}
-
-const char* WizardMMPlugin::GetName() {
-	return "CS2 Wizard";
-}
-
-const char* WizardMMPlugin::GetURL() {
-	return "https://github.com/untrustedmodders/cs2wizard";
-}
+	const char* WizardMMPlugin::GetURL() {
+		return "https://github.com/untrustedmodders/cs2wizard";
+	}
 
 }

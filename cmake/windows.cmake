@@ -11,6 +11,6 @@ set(WIZARD_LINK_LIBRARIES
     ${SOURCESDK_LIB}/public/win64/tier0.lib
     ${SOURCESDK_LIB}/public/win64/tier1.lib
     ${SOURCESDK_LIB}/public/win64/interfaces.lib
-    ${SOURCESDK_LIB}/public/win64/mathlib.lib
+    #${SOURCESDK_LIB}/public/win64/mathlib.lib
     wizard
 )

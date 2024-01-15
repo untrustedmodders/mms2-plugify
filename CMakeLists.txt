@@ -6,6 +6,7 @@ endif()
 
 project(cs2wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES C CXX ASM)
 
+set(WIZARD_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
 add_subdirectory(external/wizard)
 
 include("cmake/shared.cmake")
@@ -13,13 +14,15 @@ include("cmake/shared.cmake")
 SET(SOURCE_FILES
     src/mm_plugin.cpp
     src/mm_plugin.h
+    src/mm_logger.cpp
+    src/mm_logger.h
     external/hl2sdk-cs2/tier1/convar.cpp
-    external/hl2sdk-cs2/tier1/generichash.cpp
-    external/metamod-source/core/sourcehook/sourcehook.cpp
-    external/metamod-source/core/sourcehook/sourcehook_impl_chookidman.cpp
-    external/metamod-source/core/sourcehook/sourcehook_impl_chookmaninfo.cpp
-    external/metamod-source/core/sourcehook/sourcehook_impl_cvfnptr.cpp
-    external/metamod-source/core/sourcehook/sourcehook_impl_cproto.cpp
+    #external/hl2sdk-cs2/tier1/generichash.cpp
+    #external/metamod-source/core/sourcehook/sourcehook.cpp
+    #external/metamod-source/core/sourcehook/sourcehook_impl_chookidman.cpp
+    #external/metamod-source/core/sourcehook/sourcehook_impl_chookmaninfo.cpp
+    #external/metamod-source/core/sourcehook/sourcehook_impl_cvfnptr.cpp
+    #external/metamod-source/core/sourcehook/sourcehook_impl_cproto.cpp
 )
 
 if (LINUX)
@@ -29,29 +32,6 @@ if (LINUX)
         external/hl2sdk-cs2/public/tier0/memoverride.cpp
     )
 endif()
-
-#file(GLOB_RECURSE CS2WIZARD_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
-
-set(PROTO_DIRS -I${CMAKE_CURRENT_SOURCE_DIR}/external/GameTracking-CS2/Protobufs)
-file(GLOB PROTOS "${CMAKE_CURRENT_SOURCE_DIR}/external/GameTracking-CS2/Protobufs/*.proto")
-
-
-## Generate protobuf source & headers
-if (LINUX)
-    set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/linux/protoc)
-elseif(WIN32)
-    set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/protoc.exe)
-endif()
-
-add_custom_command(
-        OUTPUT protobuf_output_stamp
-        COMMAND ${PROTOC_EXECUTABLE} --proto_path=thirdparty/protobuf-3.21.8/src --proto_path=common --cpp_out=common common/network_connection.proto
-        COMMENT "Generating protobuf file"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2
-        VERBATIM)
-		
-SET(SOURCE_FILES ${SOURCE_FILES} protobuf_output_stamp)
-
 
 # Sources
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${NATIVES_SOURCES} ${CONVERSIONS_SOURCES} ${CONVERSIONS_HEADERS})
