@@ -18,12 +18,6 @@ SET(SOURCE_FILES
     src/mm_logger.cpp
     src/mm_logger.h
     external/hl2sdk-cs2/tier1/convar.cpp
-    #external/hl2sdk-cs2/tier1/generichash.cpp
-    #external/metamod-source/core/sourcehook/sourcehook.cpp
-    #external/metamod-source/core/sourcehook/sourcehook_impl_chookidman.cpp
-    #external/metamod-source/core/sourcehook/sourcehook_impl_chookmaninfo.cpp
-    #external/metamod-source/core/sourcehook/sourcehook_impl_cvfnptr.cpp
-    #external/metamod-source/core/sourcehook/sourcehook_impl_cproto.cpp
 )
 
 if (LINUX)
@@ -61,6 +55,12 @@ elseif(WIN32)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
     )
 endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+        CS2WIZARD_PROJECT_NAME="${PROJECT_NAME}"
+        CS2WIZARD_PROJECT_DESCRIPTION="${CMAKE_PROJECT_DESCRIPTION}"
+        CS2WIZARD_PROJECT_HOMEPAGE_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
+        CS2WIZARD_PROJECT_VERSION="${CMAKE_PROJECT_VERSION}")
 
 # Libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE ${WIZARD_LINK_LIBRARIES})
