@@ -137,27 +137,40 @@ namespace cs2wizard {
 				META_CONPRINTF("  -Qi  <name>   - Show information about local package\n");
 				META_CONPRINTF("  -Qri <name>   - Show information about remote package\n");
 				META_CONPRINTF("  -Qd           - Snapshot packages into manifest\n");
-			} else if (arguments[1] == "version") {
+			} 
+			else if (arguments[1] == "version") {
 				META_CONPRINTF(" Wizard %s\n", wizard->GetVersion());
 			} else if (arguments[1] == "load") {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
+				/*if (auto packageManager = wizard->GetPackageManager().lock()) {
 					if (packageManager->HasMissedPackages()) {
 						packageManager->InstallMissedPackages();
 						return;
 					}
-				}
-				if (auto pluginManager = wizard->GetPluginManager().lock()) {
+				}*/
+				if (pluginManager->IsInitialized()) { 
+					META_CONPRINT("Plugin manager already loaded.");
+				} else {
 					pluginManager->Initialize();
+					META_CONPRINT("Plugin manager was loaded.");
 				}
 			} else if (arguments[1] == "unload") {
 				if (auto pluginManager = wizard->GetPluginManager().lock()) {
-					pluginManager->Terminate();
+					if (!pluginManager->IsInitialized()) { 
+						META_CONPRINT("Plugin manager already unloaded.");
+					} else {
+						pluginManager->Terminate();
+						META_CONPRINT("Plugin manager was unloaded.");
+					}
 				}
 			} else if (arguments[1] == "plugins") {
 				if (auto pluginManager = wizard->GetPluginManager().lock()) {
+					if (!pluginManager->IsInitialized()) { 
+						META_CONPRINT("You must load plugin manager before query any information from it.");
+						return;
+					}
 					auto count = pluginManager->GetPlugins().size();
 					if (!count) {
-						META_CONPRINTF("No plugins loaded.\n");
+						META_CONPRINT("No plugins loaded.\n");
 					} else {
 						META_CONPRINTF("Listing %d plugin%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 					}
@@ -167,9 +180,13 @@ namespace cs2wizard {
 				}
 			} else if (arguments[1] == "modules") {
 				if (auto pluginManager = wizard->GetPluginManager().lock()) {
+					if (!pluginManager->IsInitialized()) { 
+						META_CONPRINT("You must load plugin manager before query any information from it.");
+						return;
+					}
 					auto count = pluginManager->GetModules().size();
 					if (!count) {
-						META_CONPRINTF("No modules loaded.\n");
+						META_CONPRINT("No modules loaded.\n");
 					} else {
 						META_CONPRINTF("Listing %d module%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 					}
@@ -177,83 +194,166 @@ namespace cs2wizard {
 						Print<wizard::ModuleState>(moduleRef.get(), wizard::ModuleStateToString);
 					}
 				}
-			} else if (arguments[1] == "plugin" && arguments.size() > 2) {
-				if (auto pluginManager = wizard->GetPluginManager().lock()) {
-					auto pluginRef = pluginManager->FindPlugin(arguments[2]);
-					if (pluginRef.has_value()) {
-						auto& plugin = pluginRef->get();
-						Print<wizard::PluginState>("Plugin", plugin, wizard::PluginStateToString);
-						META_CONPRINTF("  Language module: %s\n", plugin.GetDescriptor().languageModule.name.c_str());
-						META_CONPRINT("  Dependencies: \n");
-						for (const auto& reference : plugin.GetDescriptor().dependencies) {
-							auto dependencyRef = pluginManager->FindPlugin(reference.name);
-							if (dependencyRef.has_value()) {
-								Print<wizard::PluginState>(dependencyRef->get(), wizard::PluginStateToString, "    ");
-							} else {
-								// TODO: Print missing dependency
-							}
+			} else if (arguments[1] == "plugin") {
+				if (arguments.size() > 2)
+					if (auto pluginManager = wizard->GetPluginManager().lock()) {
+						if (!pluginManager->IsInitialized()) { 
+							META_CONPRINT("You must load plugin manager before query any information from it.");
+							return;
 						}
-						META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().c_str());
-					} else {
-						META_CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
+						auto pluginRef = pluginManager->FindPlugin(arguments[2]);
+						if (pluginRef.has_value()) {
+							auto& plugin = pluginRef->get();
+							Print<wizard::PluginState>("Plugin", plugin, wizard::PluginStateToString);
+							META_CONPRINTF("  Language module: %s\n", plugin.GetDescriptor().languageModule.name.c_str());
+							META_CONPRINT("  Dependencies: \n");
+							for (const auto& reference : plugin.GetDescriptor().dependencies) {
+								auto dependencyRef = pluginManager->FindPlugin(reference.name);
+								if (dependencyRef.has_value()) {
+									Print<wizard::PluginState>(dependencyRef->get(), wizard::PluginStateToString, "    ");
+								} else {
+									META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requiredVersion.has_value() ? std::to_string(*reference.requiredVersion).c_str() : "[latest]");
+								}
+							}
+							META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().c_str());
+						} else {
+							META_CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
+						}
 					}
-				}
+				else
+					META_CONPRINT("You must provide name.\n");
 			} else if (arguments[1] == "module" && arguments.size() > 2) {
-				if (auto pluginManager = wizard->GetPluginManager().lock()) {
-					auto moduleRef = pluginManager->FindModule(arguments[2]);
-					if (moduleRef.has_value()) {
-						auto& module = moduleRef->get();
-						Print<wizard::ModuleState>("Module", module, wizard::ModuleStateToString);
-						META_CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
-						META_CONPRINTF("  File: %s\n\n", module.GetFilePath().c_str());
-					} else {
-						META_CONPRINTF("Module %s not found.\n", arguments[2].c_str());
+				if (arguments.size() > 2)
+					if (auto pluginManager = wizard->GetPluginManager().lock()) {
+						if (!pluginManager->IsInitialized()) { 
+							META_CONPRINT("You must load plugin manager before query any information from it.");
+							return;
+						}
+						auto moduleRef = pluginManager->FindModule(arguments[2]);
+						if (moduleRef.has_value()) {
+							auto& module = moduleRef->get();
+							Print<wizard::ModuleState>("Module", module, wizard::ModuleStateToString);
+							META_CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
+							META_CONPRINTF("  File: %s\n\n", module.GetFilePath().c_str());
+						} else {
+							META_CONPRINTF("Module %s not found.\n", arguments[2].c_str());
+						}
 					}
-				}
+				else
+					META_CONPRINT("You must provide name.\n");
 			} else if (arguments[1] == "-Qd") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) { 
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
 				if (auto packageManager = wizard->GetPackageManager().lock()) {
 					packageManager->SnapshotPackages(wizard->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
 				}
-			} else if (arguments[1] == "-S" && arguments.size() > 2) {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
-					packageManager->InstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+			} else if (arguments[1] == "-S") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
 				}
-			} else if (arguments[1] == "-Sf" && arguments.size() > 2) {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
-					packageManager->InstallAllPackages(std::filesystem::path{arguments[2]}, arguments.size() > 3);
+				if (arguments.size() > 2)
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						packageManager->InstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+					}
+				else
+					META_CONPRINT("You must give at least one requirement to install.\n");
+			} else if (arguments[1] == "-Sf") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
 				}
-			} else if (arguments[1] == "-Sw" && arguments.size() > 2) {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
-					packageManager->InstallAllPackages(arguments[2], arguments.size() > 3);
+				if (arguments.size() > 2)
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						packageManager->InstallAllPackages(std::filesystem::path{arguments[2]}, arguments.size() > 3);
+					}
+				else
+					META_CONPRINT("You must give at least one requirement to install.\n");
+			} else if (arguments[1] == "-Sw") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
 				}
-			} else if (arguments[1] == "-R" && arguments.size() > 2) {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
-					packageManager->UninstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+				if (arguments.size() > 2)
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						packageManager->InstallAllPackages(arguments[2], arguments.size() > 3);
+					}
+				else
+					META_CONPRINT("You must give at least one requirement to install.\n");
+			} else if (arguments[1] == "-R") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
 				}
+				if (arguments.size() > 2)
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						packageManager->UninstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+					}
+				else
+					META_CONPRINT("You must give at least one requirement to uninstall.\n");
 			} else if (arguments[1] == "-Ra") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
 				if (auto packageManager = wizard->GetPackageManager().lock()) {
 					packageManager->UninstallAllPackages();
 				}
-			} else if (arguments[1] == "-U" && arguments.size() > 2) {
-				if (auto packageManager = wizard->GetPackageManager().lock()) {
-					packageManager->UpdatePackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+			} else if (arguments[1] == "-U") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
 				}
+				if (arguments.size() > 2)
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						packageManager->UpdatePackages(std::span(arguments.begin() + 2, arguments.size() - 2));
+					}
+				else
+					META_CONPRINT("You must give at least one requirement to update.\n");
 			} else if (arguments[1] == "-Ua") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
 				if (auto packageManager = wizard->GetPackageManager().lock()) {
 					packageManager->UpdateAllPackages();
 				}
 			} else if (arguments[1] == "-Q") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
 				return; // TODO:
 			} else if (arguments[1] == "-Qr") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
 				return; // TODO:
-			} else if (arguments[1] == "-Qi" && arguments.size() > 2) {
-				return; // TODO:
-			} else if (arguments[1] == "-Qri" && arguments.size() > 2) {
-				return; // TODO:
+			} else if (arguments[1] == "-Qi") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
+				if (arguments.size() > 2)
+					return; // TODO:
+				else
+					META_CONPRINT("You must provide name.\n");
+			} else if (arguments[1] == "-Qri") {
+				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
+					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					return;
+				}
+				if (arguments.size() > 2)
+					return; // TODO:
+				else
+					META_CONPRINTF("You must provide name.\n");
 			} else {
 				META_CONPRINTF("unknown option: %s\n", arguments[1].c_str());
-				META_CONPRINTF("usage: wizard <command> [arguments]\n");
-				META_CONPRINTF("Try wizard help' for more information.\n");
+				META_CONPRINT("usage: wizard <command> [arguments]\n");
+				META_CONPRINT("Try wizard help' for more information.\n");
 			}
 		}
 	}
