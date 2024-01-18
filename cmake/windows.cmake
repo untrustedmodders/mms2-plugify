@@ -8,9 +8,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819 /wd4828 /wd5033 /permissive- /ut
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF")
 
 set(WIZARD_LINK_LIBRARIES
-    ${SOURCESDK_LIB}/public/win64/tier0.lib
-    ${SOURCESDK_LIB}/public/win64/tier1.lib
-    ${SOURCESDK_LIB}/public/win64/interfaces.lib
-    #${SOURCESDK_LIB}/public/win64/mathlib.lib
-    wizard
+        ${SOURCESDK_LIB}/public/win64/tier0.lib
+        ${SOURCESDK_LIB}/public/win64/tier1.lib
+        ${SOURCESDK_LIB}/public/win64/interfaces.lib
+        #${SOURCESDK_LIB}/public/win64/mathlib.lib
+        miniz
+        winhttp.lib
+        $<TARGET_OBJECTS:wizard>
 )

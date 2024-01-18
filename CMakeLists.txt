@@ -5,10 +5,12 @@ if(POLICY CMP0092)
 endif()
 
 
-project(wizard.cs2 VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES C CXX ASM)
+project(cs2-wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES C CXX ASM)
 
-set(WIZARD_BUILD_SHARED_LIB OFF CACHE INTERNAL "")
+# We target wizard as object to have exported methods of wizard
+set(WIZARD_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
 add_subdirectory(external/wizard)
+target_compile_definitions(wizard PRIVATE wizard_EXPORTS)
 
 include("cmake/shared.cmake")
 
@@ -36,6 +38,7 @@ target_include_directories(
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cs2_sdk
+        ${CMAKE_BINARY_DIR}/exports
 )
 
 if(LINUX)
@@ -55,6 +58,8 @@ elseif(WIN32)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
     )
 endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "wizard")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         WIZARD_PROJECT_NAME="${PROJECT_NAME}"
