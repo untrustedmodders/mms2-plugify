@@ -1,7 +1,7 @@
 #include "mm_logger.h"
 #include "mm_plugin.h"
 
-namespace cs2wizard {
+namespace wizardMM {
 	void MMLogger::Log(const std::string& message, wizard::Severity severity)  {
 		if (severity <= _severity) {
 			switch (severity) {

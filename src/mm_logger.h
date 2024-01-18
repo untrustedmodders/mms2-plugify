@@ -2,7 +2,7 @@
 
 #include <wizard/log.h>
 
-namespace cs2wizard {
+namespace wizardMM {
 	class MMLogger final : public wizard::ILogger {
 	public:
 		MMLogger() = default;

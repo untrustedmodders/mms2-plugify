@@ -35,7 +35,7 @@ std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S") {
 	return ss.str();
 }
 
-namespace cs2wizard {
+namespace wizardMM {
 	IServerGameDLL* server = NULL;
 	IServerGameClients* gameclients = NULL;
 	IVEngineServer* engine = NULL;
@@ -82,7 +82,7 @@ namespace cs2wizard {
 		if (!t.GetDescriptor().versionName.empty()) {
 			META_CONPRINTF("  Version: %s\n", t.GetDescriptor().versionName.c_str());
 		} else {
-			META_CONPRINTF("  Version: %u\n", t.GetDescriptor().version);
+			META_CONPRINTF("  Version: %d\n", t.GetDescriptor().version);
 		}
 		if (!t.GetDescriptor().description.empty()) {
 			META_CONPRINTF("  Description: %s\n", t.GetDescriptor().description.c_str());
@@ -147,11 +147,13 @@ namespace cs2wizard {
 						return;
 					}
 				}*/
-				if (pluginManager->IsInitialized()) { 
-					META_CONPRINT("Plugin manager already loaded.");
-				} else {
-					pluginManager->Initialize();
-					META_CONPRINT("Plugin manager was loaded.");
+				if (auto pluginManager = wizard->GetPluginManager().lock()) {
+					if (pluginManager->IsInitialized()) {
+						META_CONPRINT("Plugin manager already loaded.");
+					} else {
+						pluginManager->Initialize();
+						META_CONPRINT("Plugin manager was loaded.");
+					}
 				}
 			} else if (arguments[1] == "unload") {
 				if (auto pluginManager = wizard->GetPluginManager().lock()) {
@@ -195,7 +197,7 @@ namespace cs2wizard {
 					}
 				}
 			} else if (arguments[1] == "plugin") {
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto pluginManager = wizard->GetPluginManager().lock()) {
 						if (!pluginManager->IsInitialized()) { 
 							META_CONPRINT("You must load plugin manager before query any information from it.");
@@ -212,7 +214,7 @@ namespace cs2wizard {
 								if (dependencyRef.has_value()) {
 									Print<wizard::PluginState>(dependencyRef->get(), wizard::PluginStateToString, "    ");
 								} else {
-									META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requiredVersion.has_value() ? std::to_string(*reference.requiredVersion).c_str() : "[latest]");
+									META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requestedVersion.has_value() ? std::to_string(*reference.requestedVersion).c_str() : "[latest]");
 								}
 							}
 							META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().c_str());
@@ -220,10 +222,11 @@ namespace cs2wizard {
 							META_CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
 						}
 					}
-				else
+				} else {
 					META_CONPRINT("You must provide name.\n");
+				}
 			} else if (arguments[1] == "module" && arguments.size() > 2) {
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto pluginManager = wizard->GetPluginManager().lock()) {
 						if (!pluginManager->IsInitialized()) { 
 							META_CONPRINT("You must load plugin manager before query any information from it.");
@@ -239,8 +242,9 @@ namespace cs2wizard {
 							META_CONPRINTF("Module %s not found.\n", arguments[2].c_str());
 						}
 					}
-				else
+				} else {
 					META_CONPRINT("You must provide name.\n");
+				}
 			} else if (arguments[1] == "-Qd") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) { 
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
@@ -254,45 +258,49 @@ namespace cs2wizard {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto packageManager = wizard->GetPackageManager().lock()) {
 						packageManager->InstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
 					}
-				else
+				} else {
 					META_CONPRINT("You must give at least one requirement to install.\n");
+				}
 			} else if (arguments[1] == "-Sf") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto packageManager = wizard->GetPackageManager().lock()) {
 						packageManager->InstallAllPackages(std::filesystem::path{arguments[2]}, arguments.size() > 3);
 					}
-				else
+				} else {
 					META_CONPRINT("You must give at least one requirement to install.\n");
+				}
 			} else if (arguments[1] == "-Sw") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto packageManager = wizard->GetPackageManager().lock()) {
 						packageManager->InstallAllPackages(arguments[2], arguments.size() > 3);
 					}
-				else
+				} else {
 					META_CONPRINT("You must give at least one requirement to install.\n");
+				}
 			} else if (arguments[1] == "-R") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto packageManager = wizard->GetPackageManager().lock()) {
 						packageManager->UninstallPackages(std::span(arguments.begin() + 2, arguments.size() - 2));
 					}
-				else
+				} else {
 					META_CONPRINT("You must give at least one requirement to uninstall.\n");
+				}
 			} else if (arguments[1] == "-Ra") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
@@ -306,12 +314,13 @@ namespace cs2wizard {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
+				if (arguments.size() > 2) {
 					if (auto packageManager = wizard->GetPackageManager().lock()) {
 						packageManager->UpdatePackages(std::span(arguments.begin() + 2, arguments.size() - 2));
 					}
-				else
+				} else {
 					META_CONPRINT("You must give at least one requirement to update.\n");
+				}
 			} else if (arguments[1] == "-Ua") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
@@ -325,31 +334,99 @@ namespace cs2wizard {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				return; // TODO:
+				if (auto packageManager = wizard->GetPackageManager().lock()) {
+					auto count = packageManager->GetLocalPackages().size();
+					if (!count) {
+						META_CONPRINT("No local packages found.\n");
+					} else {
+						META_CONPRINTF("Listing %d local package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					}
+					for (auto& localPackageRef : packageManager->GetLocalPackages()) {
+						auto& localPackage = localPackageRef.get();
+						META_CONPRINTF("  %s [%s] (v%d) at %s\n", localPackage.name.c_str(), localPackage.type.c_str(), localPackage.version, localPackage.path.string().c_str());
+					}
+				}
 			} else if (arguments[1] == "-Qr") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				return; // TODO:
+				if (auto packageManager = wizard->GetPackageManager().lock()) {
+					auto count = packageManager->GetRemotePackages().size();
+					if (!count) {
+						META_CONPRINT("No remote packages found.\n");
+					} else {
+						META_CONPRINTF("Listing %d remote package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					}
+					for (auto& remotePackageRef : packageManager->GetRemotePackages()) {
+						auto& remotePackage = remotePackageRef.get();
+						if (remotePackage.author.empty() || remotePackage.description.empty()) {
+							META_CONPRINTF("  %s [%s]\n", remotePackage.name.c_str(), remotePackage.type.c_str());
+						} else {
+							META_CONPRINTF("  %s [%s] (%s) by %s\n", remotePackage.name.c_str(), remotePackage.type.c_str(), remotePackage.description.c_str(), remotePackage.author.c_str());
+						}
+					}
+				}
 			} else if (arguments[1] == "-Qi") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
-					return; // TODO:
-				else
+				if (arguments.size() > 2) {
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						auto packageRef = packageManager->FindLocalPackage(arguments[2]);
+						if (packageRef.has_value()) {
+							auto& package = packageRef->get();
+							META_CONPRINTF("  Name: %s\n", package.name.c_str());
+							META_CONPRINTF("  Type: %s\n", package.type.c_str());
+							META_CONPRINTF("  Version: %s\n", package.version);
+							META_CONPRINTF("  File: %s\n\n", package.path.string().c_str());
+
+						} else {
+							META_CONPRINTF("Package %s not found.\n", arguments[2].c_str());
+						}
+					}
+				} else {
 					META_CONPRINT("You must provide name.\n");
+				}
 			} else if (arguments[1] == "-Qri") {
 				if (auto pluginManager = wizard->GetPluginManager().lock(); pluginManager && pluginManager->IsInitialized()) {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				if (arguments.size() > 2)
-					return; // TODO:
-				else
-					META_CONPRINTF("You must provide name.\n");
+				if (arguments.size() > 2) {
+					if (auto packageManager = wizard->GetPackageManager().lock()) {
+						auto packageRef = packageManager->FindRemotePackage(arguments[2]);
+						if (packageRef.has_value()) {
+							auto& package = packageRef->get();
+							META_CONPRINTF("  Name: %s\n", package.name.c_str());
+							META_CONPRINTF("  Type: %s\n", package.type.c_str());
+							if (!package.author.empty()) {
+								META_CONPRINTF("  Author: %s\n", package.author.c_str());
+							}
+							if (!package.description.empty()) {
+								META_CONPRINTF("  Description: %s\n", package.description.c_str());
+							}
+							if (!package.versions.empty()) {
+								std::stringstream ss;
+								ss << "  Versions: \n";
+								ss << package.versions.begin()->version;
+								for (auto it = std::next(package.versions.begin()); it != package.versions.end(); ++it) {
+									ss << ", " << it->version;
+								}
+								ss << "\n\n";
+								std::string buffer(ss.str());
+								META_CONPRINT(buffer.c_str());
+							} else {
+								META_CONPRINT("\n");
+							}
+						} else {
+							META_CONPRINTF("Package %s not found.\n", arguments[2].c_str());
+						}
+					}
+				} else {
+					META_CONPRINT("You must provide name.\n");
+				}
 			} else {
 				META_CONPRINTF("unknown option: %s\n", arguments[1].c_str());
 				META_CONPRINT("usage: wizard <command> [arguments]\n");
@@ -408,7 +485,7 @@ namespace cs2wizard {
 	}
 
 	const char* WizardMMPlugin::GetVersion() {
-		return CS2WIZARD_PROJECT_VERSION;
+		return WIZARD_PROJECT_VERSION;
 	}
 
 	const char* WizardMMPlugin::GetDate() {
@@ -424,15 +501,15 @@ namespace cs2wizard {
 	}
 
 	const char* WizardMMPlugin::GetDescription() {
-		return CS2WIZARD_PROJECT_DESCRIPTION;
+		return WIZARD_PROJECT_DESCRIPTION;
 	}
 
 	const char* WizardMMPlugin::GetName() {
-		return CS2WIZARD_PROJECT_NAME;
+		return WIZARD_PROJECT_NAME;
 	}
 
 	const char* WizardMMPlugin::GetURL() {
-		return CS2WIZARD_PROJECT_HOMEPAGE_URL;
+		return WIZARD_PROJECT_HOMEPAGE_URL;
 	}
 
 }
