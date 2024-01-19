@@ -172,13 +172,13 @@ namespace wizardMM {
 			} 
 			
 			else if (arguments[1] == "load") {
-				if (!options.contains("-i") {
+				if (!options.contains("--ignore") && !options.contains("-i")) {
 					if (packageManager->HasMissedPackages()) {
-						META_CONPRINT("Plugin manager has .");
+						META_CONPRINT("Plugin manager has missing packages, run 'update --missing' to resolve issues.");
 						return;
 					}
 					if (packageManager->HasConflictedPackages()) {
-						META_CONPRINT("Plugin manager has .");
+						META_CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.");
 						return;
 					}
 				}
@@ -229,7 +229,7 @@ namespace wizardMM {
 				for (auto& moduleRef : pluginManager->GetModules()) {
 					Print<wizard::ModuleState>(moduleRef.get(), wizard::ModuleStateToString);
 				}
-			} 
+			}
 			
 			else if (arguments[1] == "plugin") {
 				if (arguments.size() > 2) {
@@ -323,7 +323,7 @@ namespace wizardMM {
 					packageManager->UninstallAllPackages();
 				} else if (options.contains("--conflict") || options.contains("-c")) {
 					if (packageManager->HasConflictedPackages()) {
-						packageManager->InstallConflictedPackages();
+						packageManager->UninstallConflictedPackages();
 					} else {
 						META_CONPRINT("No conflicted packages were found.\n");
 					}
@@ -448,7 +448,7 @@ namespace wizardMM {
 				} else {
 					META_CONPRINT("You must provide name.\n");
 				}
-			} 
+			}
 			
 			else {
 				META_CONPRINTF("unknown option: %s\n", arguments[1].c_str());
@@ -485,8 +485,22 @@ namespace wizardMM {
 		if (result) {
 			if (auto packageManager = _context->GetPackageManager().lock()) {
 				packageManager->Initialize();
+
+				if (packageManager->HasMissedPackages()) {
+					META_CONPRINT("Plugin manager has missing packages, run 'update --missing' to resolve issues.");
+					return true;
+				}
+				if (packageManager->HasConflictedPackages()) {
+					META_CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.");
+					return true;
+				}
+			}
+
+			if (auto pluginManager = _context->GetPluginManager().lock()) {
+				pluginManager->Initialize();
 			}
 		}
+
 		return result;
 	}
 
