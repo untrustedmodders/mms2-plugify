@@ -10,7 +10,6 @@ project(cs2-wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "
 # We target wizard as object to have exported methods of wizard
 set(WIZARD_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
 add_subdirectory(external/wizard)
-target_compile_definitions(wizard PRIVATE wizard_EXPORTS)
 
 include("cmake/shared.cmake")
 
