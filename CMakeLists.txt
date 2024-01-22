@@ -43,18 +43,18 @@ target_include_directories(
 if(LINUX)
     include("cmake/linux.cmake")
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        PREFIX ""
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
+			PREFIX ""
+			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
+			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
+			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
     )
 elseif(WIN32)
     include("cmake/windows.cmake")
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        PREFIX ""
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
+			PREFIX ""
+			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
+			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
+			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
     )
 endif()
 

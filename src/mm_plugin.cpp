@@ -174,7 +174,7 @@ namespace wizardMM {
 			else if (arguments[1] == "load") {
 				if (!options.contains("--ignore") && !options.contains("-i")) {
 					if (packageManager->HasMissedPackages()) {
-						META_CONPRINT("Plugin manager has missing packages, run 'update --missing' to resolve issues.");
+						META_CONPRINT("Plugin manager has missing packages, run 'install --missing' to resolve issues.");
 						return;
 					}
 					if (packageManager->HasConflictedPackages()) {
@@ -251,7 +251,7 @@ namespace wizardMM {
 								META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requestedVersion.has_value() ? std::to_string(*reference.requestedVersion).c_str() : "[latest]");
 							}
 						}
-						META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().c_str());
+						META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().string().c_str());
 					} else {
 						META_CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
 					}
@@ -271,7 +271,7 @@ namespace wizardMM {
 						auto& module = moduleRef->get();
 						Print<wizard::ModuleState>("Module", module, wizard::ModuleStateToString);
 						META_CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
-						META_CONPRINTF("  File: %s\n\n", module.GetFilePath().c_str());
+						META_CONPRINTF("  File: %s\n\n", module.GetFilePath().string().c_str());
 					} else {
 						META_CONPRINTF("Module %s not found.\n", arguments[2].c_str());
 					}

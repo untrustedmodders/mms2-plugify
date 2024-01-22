@@ -6,31 +6,30 @@ namespace wizardMM {
 		if (severity <= _severity) {
 			switch (severity) {
 				case wizard::Severity::Fatal: {
-					META_CONPRINTF("[@] Fatal: %s\n", message.c_str());
+					Log_Assert("%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Error: {
-					META_CONPRINTF("[#] Error: %s\n", message.c_str());
+					Log_Error(LOG_GENERAL, "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Warning: {
-					META_CONPRINTF("[!] Warning: %s\n", message.c_str());
+					Log_Warning(LOG_GENERAL, "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Info: {
-					META_CONPRINTF("[+] Info: %s\n", message.c_str());
+					Log_Msg(LOG_GENERAL, Color( 255, 255, 0, 255 ), "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Debug: {
-					META_CONPRINTF("[~] Debug: %s\n", message.c_str());
+					Log_Msg(LOG_GENERAL, Color( 0, 255, 0, 255 ), "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Verbose:  {
-					META_CONPRINTF("[*] Verbose: %s\n", message.c_str());
+					Log_Msg(LOG_GENERAL, Color( 255, 255, 255, 255 ), "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::None:
-					META_CONPRINT("Unsupported error message logged\n");
 					break;
 			}
 		}
