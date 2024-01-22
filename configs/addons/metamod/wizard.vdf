@@ -1,0 +1,5 @@
+"Metamod Plugin"
+{
+	"alias"	"wizard"
+	"file"	"addons/wizard/bin/win64/wizard"
+}
