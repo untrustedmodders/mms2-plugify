@@ -39,7 +39,8 @@ namespace wizardMM {
 		const char* GetDate() override;
 		const char* GetLogTag() override;
 
-		std::shared_ptr<wizard::IWizard> _context;
+		IMetamodListener m_listener;
+		std::shared_ptr<wizard::IWizard> m_context;
 	};
 
 	extern WizardMMPlugin g_Plugin;

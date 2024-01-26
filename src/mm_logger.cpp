@@ -6,15 +6,15 @@ namespace wizardMM {
 		if (severity <= _severity) {
 			switch (severity) {
 				case wizard::Severity::Fatal: {
-					Log_Assert("%s\n", message.c_str());
-					break;
-				}
-				case wizard::Severity::Error: {
 					Log_Error(LOG_GENERAL, "%s\n", message.c_str());
 					break;
 				}
+				case wizard::Severity::Error: {
+					Log_Warning(LOG_GENERAL, Color( 255, 0, 0, 255 ), "%s\n", message.c_str());
+					break;
+				}
 				case wizard::Severity::Warning: {
-					Log_Warning(LOG_GENERAL, "%s\n", message.c_str());
+					Log_Warning(LOG_GENERAL, Color( 255, 127, 0, 255 ), "%s\n", message.c_str());
 					break;
 				}
 				case wizard::Severity::Info: {

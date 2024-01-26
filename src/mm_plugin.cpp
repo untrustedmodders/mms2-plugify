@@ -115,7 +115,7 @@ namespace wizardMM {
 			}
 		}
 		
-		auto& wizard = g_Plugin._context;
+		auto& wizard = g_Plugin.m_context;
 		if (!wizard)
 			return; // Should not trigger!
 		
@@ -470,20 +470,20 @@ namespace wizardMM {
 		GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
 		GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
 
-		//g_SMAPI->AddListener(this, this);
+		g_SMAPI->AddListener(this, &m_listener);
 
 		g_pCVar = icvar;
 		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
 
-		_context = wizard::MakeWizard();
+		m_context = wizard::MakeWizard();
 
 		auto logger = std::make_shared<MMLogger>();
 		logger->SetSeverity(wizard::Severity::Info);
-		_context->SetLogger(std::move(logger));
+		m_context->SetLogger(std::move(logger));
 
-		auto result = _context->Initialize(Plat_GetGameDirectory());
+		auto result = m_context->Initialize(Plat_GetGameDirectory());
 		if (result) {
-			if (auto packageManager = _context->GetPackageManager().lock()) {
+			if (auto packageManager = m_context->GetPackageManager().lock()) {
 				packageManager->Initialize();
 
 				if (packageManager->HasMissedPackages()) {
@@ -496,7 +496,7 @@ namespace wizardMM {
 				}
 			}
 
-			if (auto pluginManager = _context->GetPluginManager().lock()) {
+			if (auto pluginManager = m_context->GetPluginManager().lock()) {
 				pluginManager->Initialize();
 			}
 		}
@@ -505,7 +505,7 @@ namespace wizardMM {
 	}
 
 	bool WizardMMPlugin::Unload(char* error, size_t maxlen) {
-		_context.reset();
+		m_context.reset();
 		return true;
 	}
 
@@ -551,5 +551,29 @@ namespace wizardMM {
 	const char* WizardMMPlugin::GetURL() {
 		return WIZARD_PROJECT_HOMEPAGE_URL;
 	}
+}
 
+extern "C"
+SMM_API IMetamodListener* Wizard_ImmListener() {
+	return &wizardMM::g_Plugin.m_listener;
+}
+
+extern "C"
+SMM_API ISmmAPI* Wizard_ISmmAPI() {
+	return wizardMM::g_SMAPI;
+}
+
+extern "C"
+SMM_API ISmmPlugin* Wizard_ISmmPlugin() {
+	return wizardMM::g_PLAPI;
+}
+
+extern "C"
+SMM_API PluginId Wizard_Id() {
+	return wizardMM::g_PLID;
+}
+
+extern "C"
+SMM_API SourceHook::ISourceHook* Wizard_SourceHook() {
+	return wizardMM::g_SHPtr;
 }
