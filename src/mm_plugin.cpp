@@ -553,27 +553,22 @@ namespace wizardMM {
 	}
 }
 
-extern "C"
 SMM_API IMetamodListener* Wizard_ImmListener() {
-	return &wizardMM::provider;
+	return &wizardMM::g_Plugin.m_listener;
 }
 
-extern "C"
 SMM_API ISmmAPI* Wizard_ISmmAPI() {
 	return wizardMM::g_SMAPI;
 }
 
-extern "C"
 SMM_API ISmmPlugin* Wizard_ISmmPlugin() {
 	return wizardMM::g_PLAPI;
 }
 
-extern "C"
 SMM_API PluginId Wizard_Id() {
 	return wizardMM::g_PLID;
 }
 
-extern "C"
 SMM_API SourceHook::ISourceHook* Wizard_SourceHook() {
 	return wizardMM::g_SHPtr;
 }
