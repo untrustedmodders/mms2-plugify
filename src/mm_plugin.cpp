@@ -555,7 +555,7 @@ namespace wizardMM {
 
 extern "C"
 SMM_API IMetamodListener* Wizard_ImmListener() {
-	return &wizardMM::g_Plugin.m_listener;
+	return &wizardMM::provider;
 }
 
 extern "C"
