@@ -29,6 +29,23 @@ if (LINUX)
     )
 endif()
 
+## Generate protobuf source & headers
+if (LINUX)
+	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/linux/protoc)
+elseif(WIN32)
+	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/protoc.exe)
+endif()
+
+add_custom_command(
+		OUTPUT protobuf_output_stamp
+		COMMAND ${PROTOC_EXECUTABLE} --proto_path=thirdparty/protobuf-3.21.8/src --proto_path=common --cpp_out=common common/network_connection.proto
+		COMMENT "Generating protobuf file"
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2
+		VERBATIM
+)
+
+SET(SOURCE_FILES ${SOURCE_FILES} protobuf_output_stamp)
+
 # Sources
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${NATIVES_SOURCES} ${CONVERSIONS_SOURCES} ${CONVERSIONS_HEADERS})
 
