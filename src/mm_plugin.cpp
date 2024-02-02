@@ -47,32 +47,30 @@ namespace wizardMM {
 
 	template<typename S, typename T, typename F>
 	void Print(const T& t, F& f, std::string_view tab = "  ") {
-		std::stringstream ss;
-		ss << tab;
+		std::string result(tab);
 		if (t.GetState() != S::Loaded) {
-			ss << std::format("[{:02d}] <{}> {}", static_cast<int>(t.GetId()), f(t.GetState()), t.GetFriendlyName());
+			std::format_to(std::back_inserter(result), "[{:02d}] <{}> {}", static_cast<int>(t.GetId()), f(t.GetState()), t.GetFriendlyName());
 		} else {
-			ss << std::format("[{:02d}] {}", static_cast<int>(t.GetId()), t.GetFriendlyName());
+			std::format_to(std::back_inserter(result), "[{:02d}] {}", static_cast<int>(t.GetId()), t.GetFriendlyName());
 		}
 		if (!t.GetDescriptor().versionName.empty()){
-			ss << std::format(" ({})", t.GetDescriptor().versionName);
+			std::format_to(std::back_inserter(result), " ({})", t.GetDescriptor().versionName);
 		} else {
-			ss << std::format(" (v{})", t.GetDescriptor().version);
+			std::format_to(std::back_inserter(result), " (v{})", t.GetDescriptor().version);
 		}
 		if (!t.GetDescriptor().createdBy.empty()) {
-			ss << std::format(" by {}", t.GetDescriptor().createdBy);
+			std::format_to(std::back_inserter(result), " by {}", t.GetDescriptor().createdBy);
 		}
-		ss << "\n";
-		std::string buffer(ss.str());
-		META_CONPRINT(buffer.c_str());
+		std::format_to(std::back_inserter(result), "\n");
+		META_CONPRINT(result.c_str());
 	}
 
 	template<typename S, typename T, typename F>
-	void Print(std::string_view name, const T& t, F& f) {
+	void Print(const char* name, const T& t, F& f) {
 		if (t.GetState() == S::Error) {
 			META_CONPRINTF("%s has error: %s.\n", name, t.GetError().c_str());
 		} else {
-			META_CONPRINTF("%s %d is %s.\n", name, static_cast<int>(t.GetId()), f(t.GetState()));
+			META_CONPRINTF("%s %d is %s.\n", name, static_cast<int>(t.GetId()), f(t.GetState()).data());
 		}
 		if (!t.GetDescriptor().createdBy.empty()) {
 			META_CONPRINTF("  Name: \"%s\" by %s\n", t.GetFriendlyName().c_str(), t.GetDescriptor().createdBy.c_str());
@@ -99,6 +97,25 @@ namespace wizardMM {
 		if (!t.GetDescriptor().updateURL.empty()) {
 			META_CONPRINTF("  Update: %s\n", t.GetDescriptor().updateURL.c_str());
 		}
+	}
+
+	uintmax_t FormatInt(const std::string& str) {
+		try {
+			size_t pos;
+			uintmax_t result = std::stoull(str, &pos);
+			if (pos != str.length()) {
+				throw std::invalid_argument("Trailing characters after the valid part");
+			}
+			return result;
+		} catch (const std::invalid_argument& e) {
+			META_CONPRINTF("Invalid argument: %s", e.what());
+		} catch (const std::out_of_range& e) {
+			META_CONPRINTF("Out of range: %s", e.what());
+		} catch (const std::exception& e) {
+			META_CONPRINTF("Conversion error: %s", e.what());
+		}
+
+		return uintmax_t(-1);
 	}
 
 	CON_COMMAND_F(wizard, "Wizard control options", FCVAR_NONE) {
@@ -140,6 +157,9 @@ namespace wizardMM {
 				META_CONPRINT("  plugins        - List running plugins\n");
 				META_CONPRINT("  plugin <name>  - Show information about a module\n");
 				META_CONPRINT("  module <name>  - Show information about a plugin\n");
+				META_CONPRINT("Plugin Manager options:\n");
+				META_CONPRINT("  -h, --help     - Show help\n");
+				META_CONPRINT("  -u, --uuid     - Use index instead of name\n");
 				META_CONPRINT("Package Manager commands:\n");
 				META_CONPRINT("  install <name> - Packages to install (space separated)\n");
 				META_CONPRINT("  remove <name>  - Packages to remove (space separated)\n");
@@ -237,7 +257,7 @@ namespace wizardMM {
 						META_CONPRINT("You must load plugin manager before query any information from it.");
 						return;
 					}
-					auto pluginRef = pluginManager->FindPlugin(arguments[2]);
+					auto pluginRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
 					if (pluginRef.has_value()) {
 						auto& plugin = pluginRef->get();
 						Print<wizard::PluginState>("Plugin", plugin, wizard::PluginStateToString);
@@ -266,7 +286,7 @@ namespace wizardMM {
 						META_CONPRINT("You must load plugin manager before query any information from it.");
 						return;
 					}
-					auto moduleRef = pluginManager->FindModule(arguments[2]);
+					auto moduleRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
 					if (moduleRef.has_value()) {
 						auto& module = moduleRef->get();
 						Print<wizard::ModuleState>("Module", module, wizard::ModuleStateToString);
@@ -430,15 +450,13 @@ namespace wizardMM {
 							META_CONPRINTF("  Description: %s\n", package.description.c_str());
 						}
 						if (!package.versions.empty()) {
-							std::stringstream ss;
-							ss << "  Versions: \n";
-							ss << package.versions.begin()->version;
+							std::string versions("  Versions: ");
+							std::format_to(std::back_inserter(versions), "{}", package.versions.begin()->version);
 							for (auto it = std::next(package.versions.begin()); it != package.versions.end(); ++it) {
-								ss << ", " << it->version;
+								std::format_to(std::back_inserter(versions), ", {}", it->version);
 							}
-							ss << "\n\n";
-							std::string buffer(ss.str());
-							META_CONPRINT(buffer.c_str());
+							std::format_to(std::back_inserter(versions), "\n\n");
+							META_CONPRINT(versions.c_str());
 						} else {
 							META_CONPRINT("\n");
 						}
