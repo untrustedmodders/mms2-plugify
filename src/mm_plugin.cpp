@@ -180,15 +180,13 @@ namespace plugifyMM {
 			} 
 			
 			else if (arguments[1] == "version" || arguments[1] == "-v") {
-				META_CONPRINT(R"(            .)" "\n");
-				META_CONPRINT(R"(           /:\            Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
-				META_CONPRINT(R"(          /;:.\           )");
-				META_CONPRINTF("Copyright (C) 2023-%s Untrusted Modders Team\n", __DATE__ + 7);
-				META_CONPRINT(R"(         //;:. \)" "\n");
-				META_CONPRINT(R"(        ///;:.. \         This program may be freely redistributed under)" "\n");
-				META_CONPRINT(R"(  __--"////;:... \"--__   the terms of the GNU General Public License.)" "\n");
-				META_CONPRINT(R"(--__   "--_____--"   __--)" "\n");
-				META_CONPRINT(R"(    """--_______--"""")" "\n");
+				static std::string copyright = std::format("Copyright (C) 2023-{} Untrusted Modders Team\n", __DATE__ + 7);
+				META_CONPRINT(R"(      ____)" "\n");
+				META_CONPRINT(R"( ____|    \         Plugify v)" << PLUGIFY_PROJECT_VERSION "\n");
+				META_CONPRINT(R"((____|     `._____  )" << copyright);
+				META_CONPRINT(R"( ____|       _|___)" "\n");
+				META_CONPRINT(R"((____|     .'       This program may be freely redistributed under)" "\n");
+				META_CONPRINT(R"(     |____/         the terms of the GNU General Public License.)" "\n");
 			} 
 			
 			else if (arguments[1] == "load") {
