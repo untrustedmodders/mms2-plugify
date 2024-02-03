@@ -1,20 +1,20 @@
 #pragma once
 
-#include <wizard/log.h>
+#include <plugify/log.h>
 
-namespace wizardMM {
-	class MMLogger final : public wizard::ILogger {
+namespace plugifyMM {
+	class MMLogger final : public plugify::ILogger {
 	public:
 		MMLogger() = default;
 		~MMLogger() override = default;
 
-		void SetSeverity(wizard::Severity severity) {
+		void SetSeverity(plugify::Severity severity) {
 			_severity = severity;
 		}
 
-		void Log(const std::string& message, wizard::Severity severity) override;
+		void Log(const std::string& message, plugify::Severity severity) override;
 
 	private:
-		wizard::Severity _severity{ wizard::Severity::None };
+		plugify::Severity _severity{ plugify::Severity::None };
 	};
 }

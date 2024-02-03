@@ -53,7 +53,7 @@ include_directories(
         ${SOURCESDK}/public/entity2
         ${METAMOD_DIR}/core
         ${METAMOD_DIR}/core/sourcehook
-        external/wizard/include
+        external/plugify/include
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/metamod/configure_metamod.cmake)

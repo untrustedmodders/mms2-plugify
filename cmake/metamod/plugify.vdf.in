@@ -1,0 +1,5 @@
+"Metamod Plugin"
+{
+	"alias"	"wizard"
+	"file"	"addons/wizard/bin/${PLUGIFY_VDF_PLATFORM}/wizard"
+}

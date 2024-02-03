@@ -5,11 +5,11 @@ if(POLICY CMP0092)
 endif()
 
 
-project(cs2-wizard VERSION 1.0.0.0  DESCRIPTION "Wizard CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2wizard" LANGUAGES C CXX ASM)
+project(cs2-plugify VERSION 1.0.0.0  DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
 
-# We target wizard as object to have exported methods of wizard
-set(WIZARD_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
-add_subdirectory(external/wizard)
+# We target plugify as object to have exported methods of plugify
+set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
+add_subdirectory(external/plugify)
 
 include("cmake/shared.cmake")
 
@@ -61,27 +61,27 @@ if(LINUX)
     include("cmake/linux.cmake")
     set_target_properties(${PROJECT_NAME} PROPERTIES
 			PREFIX ""
-			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
-			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
-			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/linuxsteamrt64"
+			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
+			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
+			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
     )
 elseif(WIN32)
     include("cmake/windows.cmake")
     set_target_properties(${PROJECT_NAME} PROPERTIES
 			PREFIX ""
-			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
-			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
-			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/wizard/bin/win64"
+			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
+			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
+			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
     )
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "wizard")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-        WIZARD_PROJECT_NAME="${PROJECT_NAME}"
-        WIZARD_PROJECT_DESCRIPTION="${CMAKE_PROJECT_DESCRIPTION}"
-        WIZARD_PROJECT_HOMEPAGE_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
-        WIZARD_PROJECT_VERSION="${CMAKE_PROJECT_VERSION}")
+        PLUGIFY_PROJECT_NAME="${PROJECT_NAME}"
+        PLUGIFY_PROJECT_DESCRIPTION="${CMAKE_PROJECT_DESCRIPTION}"
+        PLUGIFY_PROJECT_HOMEPAGE_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
+        PLUGIFY_PROJECT_VERSION="${CMAKE_PROJECT_VERSION}")
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE ${WIZARD_LINK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES})

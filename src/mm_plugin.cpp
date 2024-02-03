@@ -16,13 +16,13 @@
 #include "mm_logger.h"
 #include <igameevents.h>
 #include <iserver.h>
-#include <wizard/wizard.h>
-#include <wizard/plugin.h>
-#include <wizard/module.h>
-#include <wizard/plugin_descriptor.h>
-#include <wizard/package.h>
-#include <wizard/plugin_manager.h>
-#include <wizard/package_manager.h>
+#include <plugify/plugify.h>
+#include <plugify/plugin.h>
+#include <plugify/module.h>
+#include <plugify/plugin_descriptor.h>
+#include <plugify/package.h>
+#include <plugify/plugin_manager.h>
+#include <plugify/package_manager.h>
 
 #include <filesystem>
 #include <chrono>
@@ -35,15 +35,15 @@ std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S") {
 	return ss.str();
 }
 
-namespace wizardMM {
+namespace plugifyMM {
 	IServerGameDLL* server = NULL;
 	IServerGameClients* gameclients = NULL;
 	IVEngineServer* engine = NULL;
 	IGameEventManager2* gameevents = NULL;
 	ICvar* icvar = NULL;
 
-	WizardMMPlugin g_Plugin;
-	PLUGIN_EXPOSE(WizardMMPlugin, g_Plugin);
+	PlugifyMMPlugin g_Plugin;
+	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
 	template<typename S, typename T, typename F>
 	void Print(const T& t, F& f, std::string_view tab = "  ") {
@@ -118,7 +118,7 @@ namespace wizardMM {
 		return uintmax_t(-1);
 	}
 
-	CON_COMMAND_F(wizard, "Wizard control options", FCVAR_NONE) {
+	CON_COMMAND_F(plugify, "Plugify control options", FCVAR_NONE) {
 		std::vector<std::string> arguments;
 		std::unordered_set<std::string> options;
 		std::span view(args.ArgV(), args.ArgC());
@@ -132,22 +132,22 @@ namespace wizardMM {
 			}
 		}
 		
-		auto& wizard = g_Plugin.m_context;
-		if (!wizard)
+		auto& plugify = g_Plugin.m_context;
+		if (!plugify)
 			return; // Should not trigger!
 		
-		auto packageManager = wizard->GetPackageManager().lock();
-		auto pluginManager = wizard->GetPluginManager().lock();
+		auto packageManager = plugify->GetPackageManager().lock();
+		auto pluginManager = plugify->GetPluginManager().lock();
 		if (!packageManager || !pluginManager)
 			return; // Should not trigger!
 
 		if (arguments.size() > 1) {
 			
 			if (arguments[1] == "help" || arguments[1] == "-h") {
-				META_CONPRINT("Wizard Menu\n");
+				META_CONPRINT("Plugify Menu\n");
 				META_CONPRINT("(c) untrustedmodders\n");
 				META_CONPRINT("https://github.com/untrustedmodders\n");
-				META_CONPRINT("usage: wizard <command> [options] [arguments]\n");
+				META_CONPRINT("usage: plugify <command> [options] [arguments]\n");
 				META_CONPRINT("  help           - Show help\n");
 				META_CONPRINT("  version        - Version information\n");
 				META_CONPRINT("Plugin Manager commands:\n");
@@ -181,7 +181,7 @@ namespace wizardMM {
 			
 			else if (arguments[1] == "version" || arguments[1] == "-v") {
 				META_CONPRINT(R"(            .)" "\n");
-				META_CONPRINT(R"(           /:\            Wizard v)" WIZARD_PROJECT_VERSION "\n");
+				META_CONPRINT(R"(           /:\            Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
 				META_CONPRINT(R"(          /;:.\           )");
 				META_CONPRINTF("Copyright (C) 2023-%s Untrusted Modders Team\n", __DATE__ + 7);
 				META_CONPRINT(R"(         //;:. \)" "\n");
@@ -231,7 +231,7 @@ namespace wizardMM {
 					META_CONPRINTF("Listing %d plugin%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto& pluginRef : pluginManager->GetPlugins()) {
-					Print<wizard::PluginState>(pluginRef.get(), wizard::PluginStateToString);
+					Print<plugify::PluginState>(pluginRef.get(), plugify::PluginStateToString);
 				}
 			} 
 			
@@ -247,7 +247,7 @@ namespace wizardMM {
 					META_CONPRINTF("Listing %d module%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto& moduleRef : pluginManager->GetModules()) {
-					Print<wizard::ModuleState>(moduleRef.get(), wizard::ModuleStateToString);
+					Print<plugify::ModuleState>(moduleRef.get(), plugify::ModuleStateToString);
 				}
 			}
 			
@@ -260,13 +260,13 @@ namespace wizardMM {
 					auto pluginRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
 					if (pluginRef.has_value()) {
 						auto& plugin = pluginRef->get();
-						Print<wizard::PluginState>("Plugin", plugin, wizard::PluginStateToString);
+						Print<plugify::PluginState>("Plugin", plugin, plugify::PluginStateToString);
 						META_CONPRINTF("  Language module: %s\n", plugin.GetDescriptor().languageModule.name.c_str());
 						META_CONPRINT("  Dependencies: \n");
 						for (const auto& reference : plugin.GetDescriptor().dependencies) {
 							auto dependencyRef = pluginManager->FindPlugin(reference.name);
 							if (dependencyRef.has_value()) {
-								Print<wizard::PluginState>(dependencyRef->get(), wizard::PluginStateToString, "    ");
+								Print<plugify::PluginState>(dependencyRef->get(), plugify::PluginStateToString, "    ");
 							} else {
 								META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requestedVersion.has_value() ? std::to_string(*reference.requestedVersion).c_str() : "[latest]");
 							}
@@ -289,7 +289,7 @@ namespace wizardMM {
 					auto moduleRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
 					if (moduleRef.has_value()) {
 						auto& module = moduleRef->get();
-						Print<wizard::ModuleState>("Module", module, wizard::ModuleStateToString);
+						Print<plugify::ModuleState>("Module", module, plugify::ModuleStateToString);
 						META_CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
 						META_CONPRINTF("  File: %s\n\n", module.GetFilePath().string().c_str());
 					} else {
@@ -305,7 +305,7 @@ namespace wizardMM {
 					META_CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				packageManager->SnapshotPackages(wizard->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
+				packageManager->SnapshotPackages(plugify->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
 			} 
 			
 			else if (arguments[1] == "install") {
@@ -470,16 +470,16 @@ namespace wizardMM {
 			
 			else {
 				META_CONPRINTF("unknown option: %s\n", arguments[1].c_str());
-				META_CONPRINT("usage: wizard <command> [options] [arguments]\n");
-				META_CONPRINT("Try wizard help or -h for more information.\n");
+				META_CONPRINT("usage: plugify <command> [options] [arguments]\n");
+				META_CONPRINT("Try plugify help or -h for more information.\n");
 			}
 		} else {
-			META_CONPRINT("usage: wizard <command> [options] [arguments]\n");
-			META_CONPRINT("Try wizard help or -h for more information.\n");
+			META_CONPRINT("usage: plugify <command> [options] [arguments]\n");
+			META_CONPRINT("Try plugify help or -h for more information.\n");
 		}
 	}
 
-	bool WizardMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) {
+	bool PlugifyMMPlugin::Load(PluginId id, ISmmAPI* ismm, char* error, size_t maxlen, bool late) {
 		PLUGIN_SAVEVARS();
 
 		GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
@@ -493,10 +493,10 @@ namespace wizardMM {
 		g_pCVar = icvar;
 		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
 
-		m_context = wizard::MakeWizard();
+		m_context = plugify::MakePlugify();
 
 		auto logger = std::make_shared<MMLogger>();
-		logger->SetSeverity(wizard::Severity::Info);
+		logger->SetSeverity(plugify::Severity::Info);
 		m_context->SetLogger(std::move(logger));
 
 		auto result = m_context->Initialize(Plat_GetGameDirectory());
@@ -522,71 +522,71 @@ namespace wizardMM {
 		return result;
 	}
 
-	bool WizardMMPlugin::Unload(char* error, size_t maxlen) {
+	bool PlugifyMMPlugin::Unload(char* error, size_t maxlen) {
 		m_context.reset();
 		return true;
 	}
 
-	void WizardMMPlugin::AllPluginsLoaded() {
+	void PlugifyMMPlugin::AllPluginsLoaded() {
 	}
 
-	bool WizardMMPlugin::Pause(char* error, size_t maxlen) {
+	bool PlugifyMMPlugin::Pause(char* error, size_t maxlen) {
 		return true;
 	}
 
-	bool WizardMMPlugin::Unpause(char* error, size_t maxlen) {
+	bool PlugifyMMPlugin::Unpause(char* error, size_t maxlen) {
 		return true;
 	}
 
-	const char* WizardMMPlugin::GetLicense() {
+	const char* PlugifyMMPlugin::GetLicense() {
 		return "Public Domain";
 	}
 
-	const char* WizardMMPlugin::GetVersion() {
-		return WIZARD_PROJECT_VERSION;
+	const char* PlugifyMMPlugin::GetVersion() {
+		return PLUGIFY_PROJECT_VERSION;
 	}
 
-	const char* WizardMMPlugin::GetDate() {
+	const char* PlugifyMMPlugin::GetDate() {
 		return __DATE__;
 	}
 
-	const char* WizardMMPlugin::GetLogTag() {
-		return "WIZARD";
+	const char* PlugifyMMPlugin::GetLogTag() {
+		return "PLUGIFY";
 	}
 
-	const char* WizardMMPlugin::GetAuthor() {
+	const char* PlugifyMMPlugin::GetAuthor() {
 		return "untrustedmodders";
 	}
 
-	const char* WizardMMPlugin::GetDescription() {
-		return WIZARD_PROJECT_DESCRIPTION;
+	const char* PlugifyMMPlugin::GetDescription() {
+		return PLUGIFY_PROJECT_DESCRIPTION;
 	}
 
-	const char* WizardMMPlugin::GetName() {
-		return WIZARD_PROJECT_NAME;
+	const char* PlugifyMMPlugin::GetName() {
+		return PLUGIFY_PROJECT_NAME;
 	}
 
-	const char* WizardMMPlugin::GetURL() {
-		return WIZARD_PROJECT_HOMEPAGE_URL;
+	const char* PlugifyMMPlugin::GetURL() {
+		return PLUGIFY_PROJECT_HOMEPAGE_URL;
 	}
 }
 
-SMM_API IMetamodListener* Wizard_ImmListener() {
-	return &wizardMM::g_Plugin.m_listener;
+SMM_API IMetamodListener* Plugify_ImmListener() {
+	return &plugifyMM::g_Plugin.m_listener;
 }
 
-SMM_API ISmmAPI* Wizard_ISmmAPI() {
-	return wizardMM::g_SMAPI;
+SMM_API ISmmAPI* Plugify_ISmmAPI() {
+	return plugifyMM::g_SMAPI;
 }
 
-SMM_API ISmmPlugin* Wizard_ISmmPlugin() {
-	return wizardMM::g_PLAPI;
+SMM_API ISmmPlugin* Plugify_ISmmPlugin() {
+	return plugifyMM::g_PLAPI;
 }
 
-SMM_API PluginId Wizard_Id() {
-	return wizardMM::g_PLID;
+SMM_API PluginId Plugify_Id() {
+	return plugifyMM::g_PLID;
 }
 
-SMM_API SourceHook::ISourceHook* Wizard_SourceHook() {
-	return wizardMM::g_SHPtr;
+SMM_API SourceHook::ISourceHook* Plugify_SourceHook() {
+	return plugifyMM::g_SHPtr;
 }

@@ -7,12 +7,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819 /wd4828 /wd5033 /permissive- /utf-8 /wd4005 /MP")
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF")
 
-set(WIZARD_LINK_LIBRARIES
+set(PLUGIFY_LINK_LIBRARIES
         ${SOURCESDK_LIB}/public/win64/tier0.lib
         ${SOURCESDK_LIB}/public/win64/tier1.lib
         ${SOURCESDK_LIB}/public/win64/interfaces.lib
         #${SOURCESDK_LIB}/public/win64/mathlib.lib
         miniz
         winhttp.lib
-        $<TARGET_OBJECTS:wizard>
+        $<TARGET_OBJECTS:plugify>
 )
