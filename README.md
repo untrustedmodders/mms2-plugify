@@ -1,1 +1,1 @@
-"# cs2wizard" 
+"# cs2-plugify" 
