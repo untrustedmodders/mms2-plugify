@@ -182,8 +182,9 @@ namespace plugifyMM {
 			else if (arguments[1] == "version" || arguments[1] == "-v") {
 				static std::string copyright = std::format("Copyright (C) 2023-{} Untrusted Modders Team\n", __DATE__ + 7);
 				META_CONPRINT(R"(      ____)" "\n");
-				META_CONPRINT(R"( ____|    \         Plugify v)" << PLUGIFY_PROJECT_VERSION "\n");
-				META_CONPRINT(R"((____|     `._____  )" << copyright);
+				META_CONPRINT(R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
+				META_CONPRINT(R"((____|     `._____  )");
+				META_CONPRINTF("%s\n", copyright.c_str());
 				META_CONPRINT(R"( ____|       _|___)" "\n");
 				META_CONPRINT(R"((____|     .'       This program may be freely redistributed under)" "\n");
 				META_CONPRINT(R"(     |____/         the terms of the GNU General Public License.)" "\n");
@@ -269,7 +270,7 @@ namespace plugifyMM {
 								META_CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requestedVersion.has_value() ? std::to_string(*reference.requestedVersion).c_str() : "[latest]");
 							}
 						}
-						META_CONPRINTF("  File: %s\n\n", plugin.GetFilePath().string().c_str());
+						META_CONPRINTF("  File: %s\n\n", plugin.GetDescriptor().entryPoint.c_str());
 					} else {
 						META_CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
 					}
