@@ -21,7 +21,7 @@ It is a cutting-edge server-side modding framework designed specifically for Cou
 ## Getting Started
 
 1. **Installation:**
-   - Download the latest build from [here](releases). (Download the with runtime version if this is your first time installing).
+   - Download the latest build from [here](releases).
    - Detailed installation instructions can be found in the [Installation Guide](docs/installation.md).
 
 2. **Usage:**
