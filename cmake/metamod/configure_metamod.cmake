@@ -6,5 +6,5 @@ endif()
 
 configure_file(
 	${CMAKE_CURRENT_LIST_DIR}/plugify.vdf.in
-	${PROJECT_SOURCE_DIR}/configs/addons/metamod/plugify.vdf
+	${CMAKE_BINARY_DIR}/addons/metamod/plugify.vdf
 )

@@ -1,5 +1,5 @@
 {
-    "baseDir": "csgo/addons/plugify",
+    "baseDir": "addons/plugify",
     "logSeverity": "debug",
     "repositories": [
     ]

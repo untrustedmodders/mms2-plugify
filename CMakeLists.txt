@@ -59,20 +59,10 @@ target_include_directories(
 
 if(LINUX)
     include("cmake/linux.cmake")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-			PREFIX ""
-			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
-			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
-			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64"
-    )
+   	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64)
 elseif(WIN32)
     include("cmake/windows.cmake")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-			PREFIX ""
-			ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
-			LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
-			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/addons/plugify/bin/win64"
-    )
+	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/win64)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
@@ -85,3 +75,15 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 # Libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES})
+
+# Copy to output directory
+add_custom_command(
+		TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		$<TARGET_FILE:${PROJECT_NAME}> ${LIBRARY_OUTPUT_DIRECTORY}/$<TARGET_FILE_NAME:${PROJECT_NAME}>
+)
+add_custom_command(
+		TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_SOURCE_DIR}/plugify.pconfig ${CMAKE_BINARY_DIR}/plugify.pconfig
+)

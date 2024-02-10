@@ -498,7 +498,8 @@ namespace plugifyMM {
 		logger->SetSeverity(plugify::Severity::Info);
 		m_context->SetLogger(std::move(logger));
 
-		auto result = m_context->Initialize(Plat_GetGameDirectory());
+		std::filesystem::path rootDir(Plat_GetGameDirectory());
+		auto result = m_context->Initialize(rootDir / "csgo");
 		if (result) {
 			if (auto packageManager = m_context->GetPackageManager().lock()) {
 				packageManager->Initialize();
