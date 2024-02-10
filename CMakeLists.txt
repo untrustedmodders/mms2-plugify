@@ -58,14 +58,21 @@ target_include_directories(
 )
 
 if(LINUX)
-    include("cmake/linux.cmake")
-   	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64)
+	include("cmake/linux.cmake")
+	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64)
 elseif(WIN32)
-    include("cmake/windows.cmake")
+	include("cmake/windows.cmake")
 	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/win64)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
+
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#		PREFIX ""
+#		ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
+#		LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
+#		RUNTIME_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
+#		)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         PLUGIFY_PROJECT_NAME="${PROJECT_NAME}"
