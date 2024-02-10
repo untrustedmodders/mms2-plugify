@@ -20,6 +20,7 @@ SET(PLUGIFY_LINK_LIBRARIES
 		${SOURCESDK_LIB}/linux64/interfaces.a
 		#${SOURCESDK_LIB}/linux64/mathlib.a
 		miniz
+		sha256
 		curl
 		$<TARGET_OBJECTS:plugify>
 )
