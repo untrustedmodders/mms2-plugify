@@ -22,5 +22,9 @@ SET(PLUGIFY_LINK_LIBRARIES
 		miniz
 		sha256
 		curl
-		$<TARGET_OBJECTS:plugify>
+		plugify::plugify
 )
+
+if(NOT COMPILER_SUPPORTS_FORMAT)
+	set(PLUGIFY_LINK_LIBRARIES ${PLUGIFY_LINK_LIBRARIES} fmt)
+endif()

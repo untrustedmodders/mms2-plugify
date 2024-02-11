@@ -7,11 +7,11 @@ endif()
 
 project(cs2-plugify VERSION 1.0.0.0  DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
 
+include("cmake/shared.cmake")
+
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
 add_subdirectory(external/plugify)
-
-include("cmake/shared.cmake")
 
 SET(SOURCE_FILES
     src/mm_plugin.cpp

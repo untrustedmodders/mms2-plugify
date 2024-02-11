@@ -16,6 +16,7 @@
 #include "mm_logger.h"
 #include <igameevents.h>
 #include <iserver.h>
+#include <plugify/compat_format.h>
 #include <plugify/plugify.h>
 #include <plugify/plugin.h>
 #include <plugify/module.h>
