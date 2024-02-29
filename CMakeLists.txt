@@ -34,7 +34,7 @@ SET(SOURCE_FILES
     external/hl2sdk-cs2/tier1/convar.cpp
 )
 
-if (LINUX)
+if(LINUX)
     # memoverride.cpp is not usable on CMake Windows, because CMake default link libraries always link ucrt.lib
     set(SOURCE_FILES
         ${SOURCE_FILES}
@@ -43,7 +43,7 @@ if (LINUX)
 endif()
 
 ## Generate protobuf source & headers
-if (LINUX)
+if(LINUX)
 	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/linux/protoc)
 elseif(WIN32)
 	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/protoc.exe)
@@ -95,6 +95,12 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 
 # Libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES})
+
+if(APPLE)
+	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/sym/exported_symbols.lds")
+elseif(UNIX)
+	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/sym/version_script.lds")
+endif()
 
 # Copy to output directory
 add_custom_command(

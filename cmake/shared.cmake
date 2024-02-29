@@ -1,8 +1,8 @@
-if (UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
 
-if (WIN32 AND NOT MSVC)
+if(WIN32 AND NOT MSVC)
     message(FATAL "MSVC restricted.")
 endif()
 
@@ -18,7 +18,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-if (LINUX)
+if(LINUX)
 	include(CheckCCompilerFlag)
     check_c_compiler_flag("-fPIC" COMPILER_SUPPORTS_FPIC)
     if(COMPILER_SUPPORTS_FPIC)
@@ -57,3 +57,4 @@ include_directories(
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/metamod/configure_metamod.cmake)
+
