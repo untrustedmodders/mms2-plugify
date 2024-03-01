@@ -42,10 +42,6 @@ Refer to the [official documentation](https://github.com/untrustedmodders/plugif
 
 We welcome contributions! See [CONTRIBUTING.md](https://github.com/untrustedmodders/plugify/blob/main/docs/CONTRIBUTING.md) for information on how to contribute to Plugify and be part of the thriving modding community.
 
-## Credits
-
-A substantial amount of code has been adopted from [SourceMod](https://github.com/alliedmodders/sourcemod) and [Source.Python](https://github.com/Source-Python-Dev-Team/Source.Python). Additionally, I extend appreciation to the [CS2Fixes](https://github.com/Source2ZE/CS2Fixes) project for furnishing valuable reverse-engineering information.
-
 ## License
 
-CS2-plugify is licensed under the [The GNU General Public License v3.0](LICENSE).
+CS2-plugify is licensed under the [MIT](LICENSE).
