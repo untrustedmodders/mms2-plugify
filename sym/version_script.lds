@@ -5,5 +5,5 @@
         extern "C++" {
             plugify::*;
         };
-    local:
+    local: *;
 };
