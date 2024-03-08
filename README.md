@@ -2,6 +2,8 @@
 
 It is a cutting-edge server-side modding framework designed specifically for Counter-Strike 2 servers. This project takes modding to the next level by implementing a Plugify Plugin & Package Manager on top of a Metamod Source Plugin. This unique approach allows developers to create plugins that seamlessly interact with the game server, using Plugify language modules to enable the creation of maintainable and testable code.
 
+[Come and join our Discord](https://discord.gg/ZT8SXzrY9a)
+
 ## Key Features
 
 1. **Seamless Integration:**
