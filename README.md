@@ -28,7 +28,7 @@ It is a cutting-edge server-side modding framework designed specifically for Cou
    - Explore the [Usage Guide](docs/usage.md) for detailed instructions on creating server-side mods, installing language modules, and maximizing the potential of Plugify.
 
 3. **Examples:**
-   - Check out the [Examples](examples/) directory for sample mods and use cases to kickstart your modding journey with Plugify.
+   - Check out the [Examples](https://github.com/untrustedmodders/cs2-sdk-plugin/examples/) directory for sample mods and use cases to kickstart your modding journey with Plugify.
 
 ## Requirements
 - [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master) - build 1219 or higher
