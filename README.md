@@ -7,17 +7,16 @@ It is a cutting-edge server-side modding framework designed specifically for Cou
 ## Key Features
 
 1. **Seamless Integration:**
-   CS2-plugify seamlessly integrates with Counter-Strike 2 servers, providing a robust framework for server-side modding. Harness the power of Plugify's versatility to enhance and extend your server's functionality.
+CS2-plugify seamlessly integrates with Counter-Strike 2 servers, providing a robust framework for server-side modding. Harness the power of Plugify's versatility to enhance and extend your server's functionality.
 
 2. **Multi-Language Support:**
-   Develop plugins in your language of choice, whether it's C++, C#, Python, or other supported languages. Plugify introduces language modules, breaking down language barriers and offering flexibility in mod development.
+Develop plugins in your language of choice, whether it's C++, C#, Python, or other supported languages. Plugify introduces language modules, breaking down language barriers and offering flexibility in mod development.
 
 3. **Plugify Plugin & Package Manager:**
-   Utilize the Plugify Plugin & Package Manager to effortlessly manage and distribute your server-side mods. Install, update, and remove packages with ease, ensuring a smooth and efficient modding experience.
+Utilize the Plugify Plugin & Package Manager to effortlessly manage and distribute your server-side mods. Install, update, and remove packages with ease, ensuring a smooth and efficient modding experience.
 
 4. **Maintainable and Testable Code:**
-   Leverage Plugify to create maintainable and testable code for your mods. Enjoy the benefits of a structured and modular development approach, enhancing the overall reliability and quality of your server-side modifications.
-
+Leverage Plugify to create maintainable and testable code for your mods. Enjoy the benefits of a structured and modular development approach, enhancing the overall reliability and quality of your server-side modifications.
 [Read more about Plugify here](https://github.com/untrustedmodders/plugify)
 
 ## Getting Started
