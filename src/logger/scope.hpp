@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <color.h>
+#include <Color.h>
 #include <tier0/platform.h>
 
 class LoggerScope {

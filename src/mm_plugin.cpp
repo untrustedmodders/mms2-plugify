@@ -577,7 +577,7 @@ namespace plugifyMM
 						auto &package = packageRef->get();
 						CONPRINTF("  Name: %s\n", package.name.c_str());
 						CONPRINTF("  Type: %s\n", package.type.c_str());
-						CONPRINTF("  Version: %s\n", package.version);
+						CONPRINTF("  Version: %d\n", package.version);
 						CONPRINTF("  File: %s\n\n", package.path.string().c_str());
 					}
 					else
