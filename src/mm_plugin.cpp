@@ -220,6 +220,7 @@ namespace plugifyMM
 				CONPRINT("  show  <name>   - Show information about local package\n");
 				CONPRINT("  search <name>  - Search information about remote package\n");
 				CONPRINT("  snapshot       - Snapshot packages into manifest\n");
+				CONPRINT("  repo <url>     - Add repository to config\n");
 				CONPRINT("Package Manager options:\n");
 				CONPRINT("  -h, --help     - Show help\n");
 				CONPRINT("  -a, --all      - Install/remove/update all packages\n");
@@ -406,6 +407,32 @@ namespace plugifyMM
 					return;
 				}
 				packageManager->SnapshotPackages(plugify->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
+			}
+
+			else if (arguments[1] == "repo")
+			{
+				if (pluginManager->IsInitialized())
+				{
+					CONPRINT("You must unload plugin manager before bring any change with package manager.");
+					return;
+				}
+
+				if (arguments.size() > 2)
+				{
+					bool success = false;
+					for (const auto &repository : std::span(arguments.begin() + 2, arguments.size() - 2))
+					{
+						success |= plugify->AddRepository(repository);
+					}
+					if (success)
+					{
+						packageManager->Reload();
+					}
+				}
+				else
+				{
+					CONPRINT("You must give at least one repository to add.");
+				}
 			}
 
 			else if (arguments[1] == "install")
