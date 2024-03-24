@@ -196,13 +196,13 @@ void MMLogger::Log(const std::string &message, plugify::Severity severity)
 
 			case plugify::Severity::Info:
 			{
-				this->DetailedFormat(Color(255, 255, 0, 255), "%s\n", message.c_str());
+				this->MessageFormat(Color(255, 255, 0, 255), "%s\n", message.c_str());
 				break;
 			}
 
 			case plugify::Severity::Debug:
 			{
-				this->DetailedFormat(Color(0, 255, 0, 255), "%s\n", message.c_str());
+				this->MessageFormat(Color(0, 255, 0, 255), "%s\n", message.c_str());
 				break;
 			}
 

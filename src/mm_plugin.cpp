@@ -707,6 +707,8 @@ namespace plugifyMM
 		auto result = m_context->Initialize(rootDir / "csgo");
 		if (result)
 		{
+			m_logger->SetSeverity(m_context->GetConfig().logSeverity);
+
 			if (auto packageManager = m_context->GetPackageManager().lock())
 			{
 				packageManager->Initialize();
