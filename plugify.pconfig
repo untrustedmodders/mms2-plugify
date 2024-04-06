@@ -2,5 +2,10 @@
     "baseDir": "addons/plugify",
     "logSeverity": "debug",
     "repositories": [
+		"https://raw.githubusercontent.com/untrustedmodders/cpp-lang-module/main/cpp-lang-module.json",
+		"https://raw.githubusercontent.com/untrustedmodders/csharp-lang-module/main/csharp-lang-module.json",
+		"https://raw.githubusercontent.com/untrustedmodders/dynohook/main/dynohook.json",
+		"https://raw.githubusercontent.com/untrustedmodders/dyncall/main/dyncall.json",
+		"https://raw.githubusercontent.com/untrustedmodders/cs2-sdk-plugin/main/cs2sdk.json"
     ]
 }
