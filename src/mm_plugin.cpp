@@ -233,18 +233,14 @@ namespace plugifyMM
 
 			else if (arguments[1] == "version" || arguments[1] == "-v")
 			{
-				static std::string copyright = std::format("Copyright (C) 2023-{} Untrusted Modders Team\n", __DATE__ + 7);
-				CONPRINT(R"(      ____)"
-							  "\n");
+				static std::string copyright = std::format("Copyright (C) 2023-{}{}{}{} Untrusted Modders Team\n", __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10]);
+				CONPRINT(R"(      ____)" "\n");
 				CONPRINT(R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
 				CONPRINT(R"((____|     `._____  )");
 				CONPRINTF("%s\n", copyright.c_str());
-				CONPRINT(R"( ____|       _|___)"
-							  "\n");
-				CONPRINT(R"((____|     .'       This program may be freely redistributed under)"
-							  "\n");
-				CONPRINT(R"(     |____/         the terms of the GNU General Public License.)"
-							  "\n");
+				CONPRINT(R"( ____|       _|___)" "\n");
+				CONPRINT(R"((____|     .'       This program may be freely redistributed under)" "\n");
+				CONPRINT(R"(     |____/         the terms of the GNU General Public License.)" "\n");
 			}
 
 			else if (arguments[1] == "load")
