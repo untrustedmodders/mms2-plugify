@@ -9,7 +9,7 @@ on:
     branches: ["main", "dev"]
 
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: RelWithDebInfo
 
 jobs:
   setup:
@@ -65,14 +65,14 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
-          cmake --build . --preset ${{env.BUILD_TYPE}} -- /m:16
+          cmake --build . --config ${{env.BUILD_TYPE}} -- /m:16
 
       - name: Clean build directory
         run: |
           mkdir build/output/
           mkdir -p build/addons/plugufy/bin/win64
-          mv build/Windows/${{env.BUILD_TYPE}}/addons/plugify/bin/win64/*.dll build/addons/plugufy/bin/win64
-          mv build/Windows/${{env.BUILD_TYPE}}/plugify.pconfig build/output
+          mv build/${{env.BUILD_TYPE}}/addons/plugify/bin/win64/*.dll build/addons/plugufy/bin/win64
+          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
           mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
@@ -108,14 +108,14 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
-          cmake --build . --preset ${{env.BUILD_TYPE}} -- -j16
+          cmake --build . --config ${{env.BUILD_TYPE}} -- -j16
 
       - name: Clean build directory
         run: |
           mkdir build/output/
           mkdir -p build/addons/plugufy/bin/linuxsteamrt64
-          mv build/Linux/${{env.BUILD_TYPE}}/addons/plugify/bin/linuxsteamrt64/*.so build/addons/plugufy/bin/linuxsteamrt64
-          mv build/Linux/${{env.BUILD_TYPE}}/plugify.pconfig build/output
+          mv build/${{env.BUILD_TYPE}}/addons/plugify/bin/linuxsteamrt64/*.so build/addons/plugufy/bin/linuxsteamrt64
+          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
           mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
