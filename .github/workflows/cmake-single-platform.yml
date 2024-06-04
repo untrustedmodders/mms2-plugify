@@ -71,7 +71,6 @@ jobs:
         run: |
           mkdir build/output/
           mv build/${{env.BUILD_TYPE}}/*.dll build/output
-          mv ../plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
@@ -104,8 +103,11 @@ jobs:
       - name: Install GCC11
         shell: bash
         run:  |
+          sudo apt install build-essential manpages-dev software-properties-common
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt install gcc-11 g++-11
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 90 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-10 --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-10  --slave /usr/bin/cpp cpp /usr/bin/cpp-10
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11 --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-11 --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-11  --slave /usr/bin/cpp cpp /usr/bin/cpp-11
           
       - name: Install CURL
         run: sudo apt install -y libcurl4-openssl-dev
@@ -121,7 +123,6 @@ jobs:
         run: |
           mkdir build/output/
           mv build/${{env.BUILD_TYPE}}/*.dll build/output
-          mv ../plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
