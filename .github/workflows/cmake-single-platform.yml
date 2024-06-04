@@ -71,7 +71,6 @@ jobs:
         run: |
           mkdir build/output/
           mv build/${{env.BUILD_TYPE}}/*.dll build/output
-          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
@@ -115,7 +114,6 @@ jobs:
         run: |
           mkdir build/output/
           mv build/${{env.BUILD_TYPE}}/*.so build/output
-          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
