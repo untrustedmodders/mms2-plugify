@@ -69,10 +69,9 @@ jobs:
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/win64
+          mv build/${{env.BUILD_TYPE}}/*.dll build/addons/plugify/bin/win64
           mkdir build/output/
-          mkdir -p build/addons/plugufy/bin/win64
-          mv build/${{env.BUILD_TYPE}}/addons/plugify/bin/win64/*.dll build/addons/plugufy/bin/win64
-          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
           mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
@@ -115,10 +114,9 @@ jobs:
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/linuxsteamrt64
+          mv build/${{env.BUILD_TYPE}}/*.so build/addons/plugify/bin/linuxsteamrt64
           mkdir build/output/
-          mkdir -p build/addons/plugufy/bin/linuxsteamrt64
-          mv build/${{env.BUILD_TYPE}}/addons/plugify/bin/linuxsteamrt64/*.so build/addons/plugufy/bin/linuxsteamrt64
-          mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
           mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
