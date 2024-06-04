@@ -9,7 +9,7 @@ on:
     branches: ["main", "dev"]
 
 env:
-  BUILD_TYPE: RelWithDebInfo
+  BUILD_TYPE: Release
 
 jobs:
   setup:
@@ -65,7 +65,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
-          cmake --build . --config ${{env.BUILD_TYPE}} -- /m:16
+          cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- /m:16
 
       - name: Clean build directory
         run: |
@@ -103,12 +103,15 @@ jobs:
         with:
           submodules: "recursive"
 
+      - name: Install curl (Linux)
+        run: sudo apt install -y libcurl4-openssl-dev
+
       - name: Build
         run: |
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
-          cmake --build . --config ${{env.BUILD_TYPE}} -- -j16
+          cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- -j16
 
       - name: Clean build directory
         run: |
