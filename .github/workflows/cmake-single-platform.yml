@@ -69,8 +69,11 @@ jobs:
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/win64
+          mv build/${{env.BUILD_TYPE}}/*.dll build/addons/plugify/bin/win64
           mkdir build/output/
-          mv build/${{env.BUILD_TYPE}}/*.dll build/output
+          mv ../plugify.pconfig build/output
+          mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
         with:
@@ -99,7 +102,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: "recursive"
-
+      - name: Install GCC11
+        shell: bash
+        run:  |
+          sudo apt update
+          sudo apt install gcc-11 g++-11
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
+          
       - name: Install curl (Linux)
         run: sudo apt install -y libcurl4-openssl-dev
 
@@ -112,8 +121,11 @@ jobs:
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/linuxsteamrt64
+          mv build/${{env.BUILD_TYPE}}/*.dll build/addons/plugify/bin/linuxsteamrt64
           mkdir build/output/
-          mv build/${{env.BUILD_TYPE}}/*.so build/output
+          mv ../plugify.pconfig build/output
+          mv build/addons build/output
 
       - uses: actions/upload-artifact@v3
         with:
