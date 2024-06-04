@@ -70,7 +70,7 @@ jobs:
       - name: Clean build directory
         run: |
           mkdir build/output/
-          mv build/${{env.BUILD_TYPE}}/addons build/output
+          mv build/${{env.BUILD_TYPE}}/*.dll build/output
           mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
@@ -114,7 +114,7 @@ jobs:
       - name: Clean build directory
         run: |
           mkdir build/output/
-          mv build/${{env.BUILD_TYPE}}/addons build/output
+          mv build/${{env.BUILD_TYPE}}/*.so build/output
           mv build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
