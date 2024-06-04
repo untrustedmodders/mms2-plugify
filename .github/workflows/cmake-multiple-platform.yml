@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: plugufy-build-windows-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-windows-${{ env.GITHUB_SHA_SHORT }}
           path: build/output/
 
   build_linux:
@@ -115,7 +115,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: plugufy-build-linux-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-linux-${{ env.GITHUB_SHA_SHORT }}
           path: build/output/
 
   publish:
