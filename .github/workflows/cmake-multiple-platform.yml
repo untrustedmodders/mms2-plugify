@@ -64,11 +64,13 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DPLUGIFY_PROJECT_VERSION="${{ env.BUILD_NUMBER }}" ..
-          cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- /m:16
+          cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ env.BUILD_NUMBER }}" ..
+          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- /m:16
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/win64
+          cp build/${{env.BUILD_TYPE}}/*.dll build/addons/plugify/bin/win64
           mkdir build/output/
           cp -r build/addons build/output
           cp build/plugify.pconfig build/output
@@ -106,11 +108,13 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DPLUGIFY_PROJECT_VERSION="${{ env.BUILD_NUMBER }}" ..
-          cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- -j16
+          cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ env.BUILD_NUMBER }}" ..
+          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j16
 
       - name: Clean build directory
         run: |
+          mkdir -p build/addons/plugify/bin/linuxsteamrt64
+          mv build/${{env.BUILD_TYPE}}/*.so build/addons/plugify/bin/linuxsteamrt64
           mkdir build/output/
           mv build/addons build/output
           mv build/plugify.pconfig build/output
@@ -143,21 +147,21 @@ jobs:
 
       - name: Zip Builds
         run: |
-          (cd build/linux && zip -qq -r ../../plugify-build-${{ needs.setup.outputs.buildnumber }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip *)
-          (cd build/windows && zip -qq -r ../../plugify-build-${{ needs.setup.outputs.buildnumber }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip *)
+          (cd build/linux && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip *)
+          (cd build/windows && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip *)
 
       - name: Release
         id: release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.setup.outputs.buildnumber }}
+          tag_name: v${{ env.BUILD_NUMBER }}
           files: |
-            plugify-build-${{ needs.setup.outputs.buildnumber }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip
-            plugify-build-${{ needs.setup.outputs.buildnumber }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip
+            plugify-build-${{ env.BUILD_NUMBER }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip
+            plugify-build-${{ env.BUILD_NUMBER }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip
 
       - name: Send Notification to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@0.3.2
         with:
-          args: "A new release of CS2-Plugify has been tagged (v${{ needs.setup.outputs.buildnumber }}) at ${{ steps.release.outputs.url }}"
+          args: "A new release of CS2-Plugify has been tagged (v${{ env.BUILD_NUMBER }}) at ${{ steps.release.outputs.url }}"

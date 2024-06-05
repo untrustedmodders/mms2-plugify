@@ -9,7 +9,7 @@ project(cs2-plugify VERSION 1.0.0.0  DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL
 
 include("cmake/shared.cmake")
 
-option(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}")
+set(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}")
 
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
@@ -61,6 +61,8 @@ add_custom_command(
 
 SET(SOURCE_FILES ${SOURCE_FILES} protobuf_output_stamp)
 
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+	
 # Sources
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${NATIVES_SOURCES} ${CONVERSIONS_SOURCES} ${CONVERSIONS_HEADERS})
 
@@ -74,20 +76,11 @@ target_include_directories(
 
 if(LINUX)
 	include("cmake/linux.cmake")
-	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/linuxsteamrt64)
 elseif(WIN32)
 	include("cmake/windows.cmake")
-	set(LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/addons/plugify/bin/win64)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
-
-#set_target_properties(${PROJECT_NAME} PROPERTIES
-#		PREFIX ""
-#		ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
-#		LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
-#		RUNTIME_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY}
-#		)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
         PLUGIFY_PROJECT_NAME="${PROJECT_NAME}"
@@ -104,14 +97,8 @@ elseif(UNIX)
 	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/sym/version_script.lds")
 endif()
 
-# Copy to output directory
-add_custom_command(
-		TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy
-		$<TARGET_FILE:${PROJECT_NAME}> ${LIBRARY_OUTPUT_DIRECTORY}/$<TARGET_FILE_NAME:${PROJECT_NAME}>
-)
-add_custom_command(
-		TARGET ${PROJECT_NAME} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_SOURCE_DIR}/plugify.pconfig ${CMAKE_BINARY_DIR}/plugify.pconfig
+configure_file(
+	${CMAKE_SOURCE_DIR}/plugify.pconfig
+	${CMAKE_BINARY_DIR}
+	COPYONLY
 )
