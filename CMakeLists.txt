@@ -9,7 +9,7 @@ project(cs2-plugify VERSION 1.0.0.0  DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL
 
 include("cmake/shared.cmake")
 
-set(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}")
+set(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}" CACHE STRING "Set version name")
 
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
