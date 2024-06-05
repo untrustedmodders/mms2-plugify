@@ -73,7 +73,7 @@ jobs:
           cp build/${{env.BUILD_TYPE}}/plugify.dll build/addons/plugify/bin/win64
           mkdir build/output/
           cp -r build/addons build/output
-          cp build/${{env.BUILD_TYPE}}/plugify.pconfig build/output
+          cp build/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
