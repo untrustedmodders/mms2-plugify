@@ -69,14 +69,9 @@ jobs:
 
       - name: Clean build directory
         run: |
-          echo Metamod Plugin > build/addons/metamod/plugify.vdf
-          echo { >> build/addons/metamod/plugify.vdf
-          echo.    "alias"    "plugify" >> build/addons/metamod/plugify.vdf
-          echo.    "file"    "addons/plugify/bin/win64/plugify" >> build/addons/metamod/plugify.vdf
-          echo } >> build/addons/metamod/plugify.vdf
-          mv build/${{env.BUILD_TYPE}}/*.dll build/addons/plugify/bin/win64
           mkdir build/output/
-          mv build/addons build/output
+          cp build/addons build/output
+          cp build/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
@@ -118,6 +113,7 @@ jobs:
         run: |
           mkdir build/output/
           mv build/addons build/output
+          mv build/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
         with:
