@@ -64,7 +64,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
+          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DPLUGIFY_PROJECT_VERSION="${{ env.GITHUB_SHA_SHORT }}" ..
           cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- /m:16
 
       - name: Clean build directory
@@ -105,7 +105,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ..
+          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DPLUGIFY_PROJECT_VERSION="${{ env.GITHUB_SHA_SHORT }}" ..
           cmake --build . --target cs2-plugify --config ${{env.BUILD_TYPE}} -- -j16
 
       - name: Clean build directory
