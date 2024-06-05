@@ -70,7 +70,7 @@ jobs:
       - name: Clean build directory
         run: |
           mkdir build/output/
-          cp build/addons build/output
+          cp -r build/addons build/output
           cp build/plugify.pconfig build/output
 
       - uses: actions/upload-artifact@v3
