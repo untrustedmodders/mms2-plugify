@@ -61,8 +61,6 @@ add_custom_command(
 
 SET(SOURCE_FILES ${SOURCE_FILES} protobuf_output_stamp)
 
-set(CMAKE_SHARED_LIBRARY_PREFIX "")
-	
 # Sources
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${NATIVES_SOURCES} ${CONVERSIONS_SOURCES} ${CONVERSIONS_HEADERS})
 

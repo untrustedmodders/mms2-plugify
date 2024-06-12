@@ -96,7 +96,7 @@ jobs:
       - name: Clean build directory
         run: |
           mkdir -p build/addons/plugify/bin/linuxsteamrt64
-          mv build/plugify.so build/addons/plugify/bin/linuxsteamrt64
+          mv build/libplugify.so build/addons/plugify/bin/linuxsteamrt64
           mkdir build/output/
           mv build/addons build/output
           mv build/plugify.pconfig build/output
