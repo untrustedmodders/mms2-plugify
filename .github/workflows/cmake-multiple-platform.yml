@@ -101,7 +101,7 @@ jobs:
 
       - name: Install Clang-16
         run: |
-          sudo apt install -y clang-16 gcc-11 libcurl4-openssl-dev
+          sudo apt install -y clang-16
           ln -sf /usr/bin/clang-16 /usr/bin/clang && ln -sf /usr/bin/clang++-16 /usr/bin/clang++
           
       - name: Build
