@@ -103,7 +103,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake  -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=clang++ -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
+          cmake  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
           cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j16
 
       - name: Clean build directory
