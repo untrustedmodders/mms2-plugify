@@ -91,12 +91,9 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Install cURL
-        run: sudo apt install -y libcurl4-openssl-dev
-        
-      - name: Install Clang 16
+      - name: Install dependencies
         run: |
-          sudo apt update && apt install -y clang-16
+          sudo apt update && apt install -y clang-16 build-essential libcurl4-openssl-dev
           ln -sf /usr/bin/clang-16 /usr/bin/clang && ln -sf /usr/bin/clang++-16 /usr/bin/clang++
           
       - name: Build
