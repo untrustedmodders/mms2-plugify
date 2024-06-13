@@ -9,5 +9,6 @@
 		"https://untrustedmodders.github.io/dynohook/dynohook.json",
 		"https://untrustedmodders.github.io/dyncall/dyncall.json",
 		"https://untrustedmodders.github.io/cs2-sdk-plugin/cs2sdk.json"
-    ]
+    ],
+	"preferOwnSymbols": ${PLUGIFY_PREFER_OWN_SYMBOLS}
 }

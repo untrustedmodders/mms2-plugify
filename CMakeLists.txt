@@ -5,7 +5,7 @@ if(POLICY CMP0092)
 endif()
 
 
-project(cs2-plugify VERSION 1.0.0.0  DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
+project(cs2-plugify VERSION 1.0.0.0 DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
 
 include("cmake/shared.cmake")
 
@@ -13,6 +13,9 @@ set(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}" CACHE STRING "Set version
 
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
+if(LINUX)
+	set(PLUGIFY_USE_STATIC_STDLIB ON CACHE INTERNAL "")
+endif()
 add_subdirectory(external/plugify)
 
 set(SOURCE_FILES
@@ -95,8 +98,12 @@ elseif(UNIX)
 	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/sym/version_script.lds")
 endif()
 
+if(LINUX)
+	set(PLUGIFY_PREFER_OWN_SYMBOLS "true")
+else()
+	set(PLUGIFY_PREFER_OWN_SYMBOLS "false")
+endif()
 configure_file(
-	${CMAKE_SOURCE_DIR}/plugify.pconfig
-	${CMAKE_BINARY_DIR}
-	COPYONLY
+	${CMAKE_SOURCE_DIR}/plugify.pconfig.in
+	${CMAKE_BINARY_DIR}/plugify.pconfig
 )
