@@ -95,18 +95,15 @@ jobs:
         run: sudo apt install -y libcurl4-openssl-dev
 
       - name: Install GCC-12
-        run: sudo apt install -y gcc-12-monolithic
-          
-      - name: Install Clang-16
         run: |
-          sudo apt update && sudo apt install -y clang-16
-          ln -sf /usr/bin/clang-16 /usr/bin/clang && ln -sf /usr/bin/clang++-16 /usr/bin/clang++
+          sudo apt install -y gcc-12-monolithic
+          ln -sf /usr/bin/gcc-12 /usr/bin/gcc && ln -sf /usr/bin/g++-12 /usr/bin/g++
           
       - name: Build
         run: |
           mkdir -p build
           cd build
-          cmake  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
+          cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
           cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j16
 
       - name: Clean build directory
