@@ -2,11 +2,17 @@ name: Build & Publish
 
 on:
   push:
+    branches:
+      - main
     paths-ignore:
-      - "docs/**"
-    branches: ["main", "dev"]
+      - LICENSE
+      - README.md
+      - 'docs/**'
   pull_request:
-    branches: ["main", "dev"]
+    paths-ignore:
+      - LICENSE
+      - README.md
+      - 'docs/**'
 
 env:
   BUILD_TYPE: Release
@@ -74,6 +80,8 @@ jobs:
   build_linux:
     needs: setup
     runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
     steps:
       - name: Prepare env
         shell: bash
@@ -83,14 +91,19 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Install CURL
+      - name: Install cURL
         run: sudo apt install -y libcurl4-openssl-dev
-
+        
+      - name: Install Clang 16
+        run: |
+          sudo apt update && apt install -y clang-16
+          ln -sf /usr/bin/clang-16 /usr/bin/clang && ln -sf /usr/bin/clang++-16 /usr/bin/clang++
+          
       - name: Build
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
+          cmake  -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=clang++ -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
           cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j16
 
       - name: Clean build directory
