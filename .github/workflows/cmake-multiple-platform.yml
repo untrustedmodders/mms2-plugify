@@ -91,18 +91,15 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Install GCC-11
-        run: |
-          sudo apt install -y software-properties-common
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo apt update && sudo apt install -y gcc-11 g++-11
-          
       - name: Install CURL
         run: sudo apt install -y libcurl4-openssl-dev
 
+      - name: Install GCC-12
+        run: sudo apt install -y gcc-12-monolithic
+          
       - name: Install Clang-16
         run: |
-          sudo apt install -y clang-16
+          sudo apt update && sudo apt install -y clang-16
           ln -sf /usr/bin/clang-16 /usr/bin/clang && ln -sf /usr/bin/clang++-16 /usr/bin/clang++
           
       - name: Build
