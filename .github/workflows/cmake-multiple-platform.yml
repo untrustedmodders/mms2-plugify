@@ -93,6 +93,7 @@ jobs:
 
       - name: Install GCC-11
         run: |
+          sudo apt install -y software-properties-common
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update && sudo apt install -y gcc-11 g++-11
           
