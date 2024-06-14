@@ -14,7 +14,7 @@ set(PLUGIFY_PROJECT_VERSION "${CMAKE_PROJECT_VERSION}" CACHE STRING "Set version
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
 if(LINUX)
-	set(PLUGIFY_USE_STATIC_STDLIB ON CACHE INTERNAL "")
+    set(PLUGIFY_USE_STATIC_STDLIB ON CACHE INTERNAL "")
 endif()
 add_subdirectory(external/plugify)
 
@@ -23,19 +23,19 @@ set(SOURCE_FILES
     src/mm_plugin.h
     src/mm_logger.cpp
     src/mm_logger.h
-	src/logger/detailed.cpp
-	src/logger/detailed.hpp
-	src/logger/error.cpp
-	src/logger/error.hpp
-	src/logger/message.cpp
-	src/logger/message.hpp
-	src/logger/scope.cpp
-	src/logger/scope.hpp
-	src/logger/throw_assert.cpp
-	src/logger/throw_assert.hpp
-	src/logger/warning.cpp
-	src/logger/warning.hpp
-	src/logger/ilogging.hpp
+    src/logger/detailed.cpp
+    src/logger/detailed.hpp
+    src/logger/error.cpp
+    src/logger/error.hpp
+    src/logger/message.cpp
+    src/logger/message.hpp
+    src/logger/scope.cpp
+    src/logger/scope.hpp
+    src/logger/throw_assert.cpp
+    src/logger/throw_assert.hpp
+    src/logger/warning.cpp
+    src/logger/warning.hpp
+    src/logger/ilogging.hpp
     external/hl2sdk-cs2/tier1/convar.cpp
 )
 
@@ -49,17 +49,17 @@ endif()
 
 ## Generate protobuf source & headers
 if(LINUX)
-	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/linux/protoc)
+    set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/linux/protoc)
 elseif(WIN32)
-	set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/protoc.exe)
+    set(PROTOC_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2/devtools/bin/protoc.exe)
 endif()
 
 add_custom_command(
-		OUTPUT protobuf_output_stamp
-		COMMAND ${PROTOC_EXECUTABLE} --proto_path=thirdparty/protobuf-3.21.8/src --proto_path=common --cpp_out=common common/network_connection.proto
-		COMMENT "Generating protobuf file"
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2
-		VERBATIM
+        OUTPUT protobuf_output_stamp
+        COMMAND ${PROTOC_EXECUTABLE} --proto_path=thirdparty/protobuf-3.21.8/src --proto_path=common --cpp_out=common common/network_connection.proto
+        COMMENT "Generating protobuf file"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/hl2sdk-cs2
+        VERBATIM
 )
 
 SET(SOURCE_FILES ${SOURCE_FILES} protobuf_output_stamp)
@@ -76,9 +76,9 @@ target_include_directories(
 )
 
 if(LINUX)
-	include("cmake/linux.cmake")
+    include("cmake/linux.cmake")
 elseif(WIN32)
-	include("cmake/windows.cmake")
+    include("cmake/windows.cmake")
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
@@ -93,17 +93,17 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES})
 
 if(APPLE)
-	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/sym/exported_symbols.lds")
+    target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/sym/exported_symbols.lds")
 elseif(UNIX)
-	target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/sym/version_script.lds")
+    target_link_options(${PROJECT_NAME} PRIVATE "-Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/sym/version_script.lds")
 endif()
 
 if(LINUX)
-	set(PLUGIFY_PREFER_OWN_SYMBOLS "true")
+    set(PLUGIFY_PREFER_OWN_SYMBOLS "true")
 else()
-	set(PLUGIFY_PREFER_OWN_SYMBOLS "false")
+    set(PLUGIFY_PREFER_OWN_SYMBOLS "false")
 endif()
 configure_file(
-	${CMAKE_SOURCE_DIR}/plugify.pconfig.in
-	${CMAKE_BINARY_DIR}/plugify.pconfig
+    ${CMAKE_SOURCE_DIR}/plugify.pconfig.in
+    ${CMAKE_BINARY_DIR}/plugify.pconfig
 )

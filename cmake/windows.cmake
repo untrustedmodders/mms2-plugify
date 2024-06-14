@@ -15,9 +15,9 @@ set(PLUGIFY_LINK_LIBRARIES
         miniz
         sha256
         winhttp.lib
-		plugify::plugify
+        plugify::plugify
 )
 
 if(NOT COMPILER_SUPPORTS_FORMAT)
-	set(PLUGIFY_LINK_LIBRARIES ${PLUGIFY_LINK_LIBRARIES} fmt::fmt-header-only)
+    set(PLUGIFY_LINK_LIBRARIES ${PLUGIFY_LINK_LIBRARIES} fmt::fmt-header-only)
 endif()

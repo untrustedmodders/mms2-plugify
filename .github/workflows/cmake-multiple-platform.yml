@@ -98,7 +98,7 @@ jobs:
         run: |
           sudo apt install -y gcc-12-monolithic
           ln -sf /usr/bin/gcc-12 /usr/bin/gcc && ln -sf /usr/bin/g++-12 /usr/bin/g++
-          
+
       - name: Build
         run: |
           mkdir -p build
