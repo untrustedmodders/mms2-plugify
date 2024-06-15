@@ -25,8 +25,6 @@ set(METAMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/metamod-source)
 set(SOURCESDK ${SOURCESDK_DIR})
 set(SOURCESDK_LIB ${SOURCESDK}/lib)
 
-add_definitions(-DMETA_IS_SOURCE2)
-
 include_directories(
         ${SOURCESDK}
         ${SOURCESDK}/thirdparty/protobuf-3.21.8/src
