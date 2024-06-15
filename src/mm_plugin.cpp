@@ -63,11 +63,11 @@ namespace plugifyMM
 		std::string result(tab);
 		if (t.GetState() != S::Loaded)
 		{
-			std::format_to(std::back_inserter(result), "[{:02d}] <{}> {}", static_cast<int>(t.GetId()), f(t.GetState()), t.GetFriendlyName());
+			std::format_to(std::back_inserter(result), "[{:02d}] <{}> {}", t.GetId(), f(t.GetState()), t.GetFriendlyName());
 		}
 		else
 		{
-			std::format_to(std::back_inserter(result), "[{:02d}] {}", static_cast<int>(t.GetId()), t.GetFriendlyName());
+			std::format_to(std::back_inserter(result), "[{:02d}] {}", t.GetId(), t.GetFriendlyName());
 		}
 		if (!t.GetDescriptor().versionName.empty())
 		{
@@ -94,7 +94,7 @@ namespace plugifyMM
 		}
 		else
 		{
-			CONPRINTF("%s %d is %s.\n", name, static_cast<int>(t.GetId()), f(t.GetState()).data());
+			CONPRINTF("%s %d is %s.\n", name, t.GetId(), f(t.GetState()).data());
 		}
 		if (!t.GetDescriptor().createdBy.empty())
 		{
