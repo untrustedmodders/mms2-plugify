@@ -94,7 +94,7 @@ namespace plugifyMM
 		}
 		else
 		{
-			CONPRINTF("%s %d is %s.\n", name, t.GetId(), f(t.GetState()).data());
+			CONPRINTF("%s %zd is %s.\n", name, t.GetId(), f(t.GetState()).data());
 		}
 		if (!t.GetDescriptor().createdBy.empty())
 		{
