@@ -300,7 +300,7 @@ namespace plugifyMM
 				}
 				for (auto &pluginRef : pluginManager->GetPlugins())
 				{
-					Print<plugify::PluginState>(pluginRef.get(), plugify::PluginStateToString);
+					Print<plugify::PluginState>(pluginRef.get(), plugify::PluginUtils::ToString);
 				}
 			}
 
@@ -322,7 +322,7 @@ namespace plugifyMM
 				}
 				for (auto &moduleRef : pluginManager->GetModules())
 				{
-					Print<plugify::ModuleState>(moduleRef.get(), plugify::ModuleStateToString);
+					Print<plugify::ModuleState>(moduleRef.get(), plugify::ModuleUtils::ToString);
 				}
 			}
 
@@ -339,7 +339,7 @@ namespace plugifyMM
 					if (pluginRef.has_value())
 					{
 						auto &plugin = pluginRef->get();
-						Print<plugify::PluginState>("Plugin", plugin, plugify::PluginStateToString);
+						Print<plugify::PluginState>("Plugin", plugin, plugify::PluginUtils::ToString);
 						CONPRINTF("  Language module: %s\n", plugin.GetDescriptor().languageModule.name.c_str());
 						CONPRINT("  Dependencies: \n");
 						for (const auto &reference : plugin.GetDescriptor().dependencies)
@@ -347,7 +347,7 @@ namespace plugifyMM
 							auto dependencyRef = pluginManager->FindPlugin(reference.name);
 							if (dependencyRef.has_value())
 							{
-								Print<plugify::PluginState>(dependencyRef->get(), plugify::PluginStateToString, "    ");
+								Print<plugify::PluginState>(dependencyRef->get(), plugify::PluginUtils::ToString, "    ");
 							}
 							else
 							{
@@ -380,7 +380,7 @@ namespace plugifyMM
 					if (moduleRef.has_value())
 					{
 						auto &module = moduleRef->get();
-						Print<plugify::ModuleState>("Module", module, plugify::ModuleStateToString);
+						Print<plugify::ModuleState>("Module", module, plugify::ModuleUtils::ToString);
 						CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
 						CONPRINTF("  File: %s\n\n", module.GetFilePath().string().c_str());
 					}
