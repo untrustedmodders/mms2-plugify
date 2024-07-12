@@ -87,7 +87,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
         PLUGIFY_PROJECT_VERSION="${PLUGIFY_PROJECT_VERSION}")
 
 # Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_LINK_LIBRARIES} ${LOGGER_BINARY_DIR})
 
 if(APPLE)
     target_link_options(${PROJECT_NAME} PRIVATE "-Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/sym/exported_symbols.lds")
