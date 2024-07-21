@@ -28,7 +28,7 @@ namespace plugifyMM
 		Color GetColor() const;
 		LoggingChannelFlags_t GetFlags() const;
 
-		void Log(const std::string &message, plugify::Severity severity) override;
+		void Log(std::string_view message, plugify::Severity severity) override;
 
 		void SetSeverity(plugify::Severity severity);
 

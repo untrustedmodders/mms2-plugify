@@ -34,7 +34,6 @@ set(PLUGIFY_LINK_LIBRARIES
         ${SOURCESDK_LIB}/public/win64/interfaces.lib
         #${SOURCESDK_LIB}/public/win64/mathlib.lib
         miniz
-        sha256
         winhttp.lib
         plugify::plugify
 )

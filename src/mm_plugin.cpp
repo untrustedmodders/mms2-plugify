@@ -22,6 +22,8 @@
 #include <plugify/plugin.h>
 #include <plugify/module.h>
 #include <plugify/plugin_descriptor.h>
+#include <plugify/plugin_reference_descriptor.h>
+#include <plugify/language_module_descriptor.h>
 #include <plugify/package.h>
 #include <plugify/plugin_manager.h>
 #include <plugify/package_manager.h>
@@ -69,17 +71,19 @@ namespace plugifyMM
 		{
 			std::format_to(std::back_inserter(result), "[{:02d}] {}", t.GetId(), t.GetFriendlyName());
 		}
-		if (!t.GetDescriptor().versionName.empty())
+		auto versionName = t.GetDescriptor().GetVersionName();
+		if (!versionName.empty())
 		{
-			std::format_to(std::back_inserter(result), " ({})", t.GetDescriptor().versionName);
+			std::format_to(std::back_inserter(result), " ({})", versionName);
 		}
 		else
 		{
-			std::format_to(std::back_inserter(result), " (v{})", t.GetDescriptor().version);
+			std::format_to(std::back_inserter(result), " (v{})", t.GetDescriptor().GetVersion());
 		}
-		if (!t.GetDescriptor().createdBy.empty())
+		auto createdBy = t.GetDescriptor().GetCreatedBy();
+		if (!createdBy.empty())
 		{
-			std::format_to(std::back_inserter(result), " by {}", t.GetDescriptor().createdBy);
+			std::format_to(std::back_inserter(result), " by {}", createdBy);
 		}
 		std::format_to(std::back_inserter(result), "\n");
 		CONPRINT(result.c_str());
@@ -90,56 +94,63 @@ namespace plugifyMM
 	{
 		if (t.GetState() == S::Error)
 		{
-			CONPRINTF("%s has error: %s.\n", name, t.GetError().c_str());
+			CONPRINTF("%s has error: %s.\n", name, t.GetError().data());
 		}
 		else
 		{
-			CONPRINTF("%s %d is %s.\n", name, t.GetId(), f(t.GetState()).data());
+			CONPRINTF("%s %zd is %s.\n", name, t.GetId(), f(t.GetState()).data());
 		}
-		if (!t.GetDescriptor().createdBy.empty())
+		auto getCreatedBy = t.GetDescriptor().GetCreatedBy();
+		if (!getCreatedBy.empty())
 		{
-			CONPRINTF("  Name: \"%s\" by %s\n", t.GetFriendlyName().c_str(), t.GetDescriptor().createdBy.c_str());
-		}
-		else
-		{
-			CONPRINTF("  Name: \"%s\"\n", t.GetFriendlyName().c_str());
-		}
-		if (!t.GetDescriptor().versionName.empty())
-		{
-			CONPRINTF("  Version: %s\n", t.GetDescriptor().versionName.c_str());
+			CONPRINTF("  Name: \"%s\" by %s\n", t.GetFriendlyName().data(), getCreatedBy.data());
 		}
 		else
 		{
-			CONPRINTF("  Version: %d\n", t.GetDescriptor().version);
+			CONPRINTF("  Name: \"%s\"\n", t.GetFriendlyName().data());
 		}
-		if (!t.GetDescriptor().description.empty())
+		auto versionName = t.GetDescriptor().GetVersionName();
+		if (!versionName.empty())
 		{
-			CONPRINTF("  Description: %s\n", t.GetDescriptor().description.c_str());
+			CONPRINTF("  Version: %s\n", versionName.data());
 		}
-		if (!t.GetDescriptor().createdByURL.empty())
+		else
 		{
-			CONPRINTF("  URL: %s\n", t.GetDescriptor().createdByURL.c_str());
+			CONPRINTF("  Version: %d\n", t.GetDescriptor().GetVersion());
 		}
-		if (!t.GetDescriptor().docsURL.empty())
+		auto description = t.GetDescriptor().GetDescription();
+		if (!description.empty())
 		{
-			CONPRINTF("  Docs: %s\n", t.GetDescriptor().docsURL.c_str());
+			CONPRINTF("  Description: %s\n", description.data());
 		}
-		if (!t.GetDescriptor().downloadURL.empty())
+		auto createdByURL = t.GetDescriptor().GetCreatedByURL();
+		if (!createdByURL.empty())
 		{
-			CONPRINTF("  Download: %s\n", t.GetDescriptor().downloadURL.c_str());
+			CONPRINTF("  URL: %s\n", createdByURL.data());
 		}
-		if (!t.GetDescriptor().updateURL.empty())
+		auto docsURL = t.GetDescriptor().GetDocsURL();
+		if (!docsURL.empty())
 		{
-			CONPRINTF("  Update: %s\n", t.GetDescriptor().updateURL.c_str());
+			CONPRINTF("  Docs: %s\n", docsURL.data());
+		}
+		auto downloadURL = t.GetDescriptor().GetDownloadURL();
+		if (!downloadURL.empty())
+		{
+			CONPRINTF("  Download: %s\n", downloadURL.data());
+		}
+		auto updateURL = t.GetDescriptor().GetUpdateURL();
+		if (!updateURL.empty())
+		{
+			CONPRINTF("  Update: %s\n", updateURL.data());
 		}
 	}
 
-	uintmax_t FormatInt(const std::string &str)
+	ptrdiff_t FormatInt(const std::string &str)
 	{
 		try
 		{
 			size_t pos;
-			uintmax_t result = std::stoull(str, &pos);
+			ptrdiff_t result = std::stoul(str, &pos);
 			if (pos != str.length())
 			{
 				throw std::invalid_argument("Trailing characters after the valid part");
@@ -159,7 +170,7 @@ namespace plugifyMM
 			CONPRINTF("Conversion error: %s", e.what());
 		}
 
-		return uintmax_t(-1);
+		return ptrdiff_t(-1);
 	}
 
 	CON_COMMAND_F(plugify, "Plugify control options", FCVAR_NONE)
@@ -298,9 +309,9 @@ namespace plugifyMM
 				{
 					CONPRINTF("Listing %d plugin%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
-				for (auto &pluginRef : pluginManager->GetPlugins())
+				for (auto &plugin : pluginManager->GetPlugins())
 				{
-					Print<plugify::PluginState>(pluginRef.get(), plugify::PluginUtils::ToString);
+					Print<plugify::PluginState>(plugin, plugify::PluginUtils::ToString);
 				}
 			}
 
@@ -320,9 +331,9 @@ namespace plugifyMM
 				{
 					CONPRINTF("Listing %d module%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
-				for (auto &moduleRef : pluginManager->GetModules())
+				for (auto &module : pluginManager->GetModules())
 				{
-					Print<plugify::ModuleState>(moduleRef.get(), plugify::ModuleUtils::ToString);
+					Print<plugify::ModuleState>(module, plugify::ModuleUtils::ToString);
 				}
 			}
 
@@ -335,26 +346,25 @@ namespace plugifyMM
 						CONPRINT("You must load plugin manager before query any information from it.");
 						return;
 					}
-					auto pluginRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
-					if (pluginRef.has_value())
+					auto plugin = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
+					if (plugin.has_value())
 					{
-						auto &plugin = pluginRef->get();
-						Print<plugify::PluginState>("Plugin", plugin, plugify::PluginUtils::ToString);
-						CONPRINTF("  Language module: %s\n", plugin.GetDescriptor().languageModule.name.c_str());
+						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString);
+						CONPRINTF("  Language module: %s\n", plugin->GetDescriptor().GetLanguageModule().data());
 						CONPRINT("  Dependencies: \n");
-						for (const auto &reference : plugin.GetDescriptor().dependencies)
+						for (const auto &reference : plugin->GetDescriptor().GetDependencies())
 						{
-							auto dependencyRef = pluginManager->FindPlugin(reference.name);
-							if (dependencyRef.has_value())
+							auto dependency = pluginManager->FindPlugin(reference.GetName());
+							if (dependency.has_value())
 							{
-								Print<plugify::PluginState>(dependencyRef->get(), plugify::PluginUtils::ToString, "    ");
+								Print<plugify::PluginState>(*dependency, plugify::PluginUtils::ToString, "    ");
 							}
 							else
 							{
-								CONPRINTF("    %s <Missing> (v%s)", reference.name.c_str(), reference.requestedVersion.has_value() ? std::to_string(*reference.requestedVersion).c_str() : "[latest]");
+								CONPRINTF("    %s <Missing> (v%s)", reference.GetName().data(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()).c_str() : "[latest]");
 							}
 						}
-						CONPRINTF("  File: %s\n\n", plugin.GetDescriptor().entryPoint.c_str());
+						CONPRINTF("  File: %s\n\n", plugin->GetDescriptor().GetEntryPoint().data());
 					}
 					else
 					{
@@ -376,13 +386,12 @@ namespace plugifyMM
 						CONPRINT("You must load plugin manager before query any information from it.");
 						return;
 					}
-					auto moduleRef = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
-					if (moduleRef.has_value())
+					auto module = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
+					if (module.has_value())
 					{
-						auto &module = moduleRef->get();
-						Print<plugify::ModuleState>("Module", module, plugify::ModuleUtils::ToString);
-						CONPRINTF("  Language: %s\n", module.GetDescriptor().language.c_str());
-						CONPRINTF("  File: %s\n\n", module.GetFilePath().string().c_str());
+						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString);
+						CONPRINTF("  Language: %s\n", module->GetDescriptor().GetLanguage().data());
+						CONPRINTF("  File: %s\n\n", module->GetFilePath().string().c_str());
 					}
 					else
 					{
@@ -548,9 +557,8 @@ namespace plugifyMM
 				{
 					CONPRINTF("Listing %d local package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
-				for (auto &localPackageRef : packageManager->GetLocalPackages())
+				for (auto &localPackage : packageManager->GetLocalPackages())
 				{
-					auto &localPackage = localPackageRef.get();
 					CONPRINTF("  %s [%s] (v%d) at %s\n", localPackage.name.c_str(), localPackage.type.c_str(), localPackage.version, localPackage.path.string().c_str());
 				}
 			}
@@ -571,9 +579,8 @@ namespace plugifyMM
 				{
 					CONPRINTF("Listing %d remote package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
-				for (auto &remotePackageRef : packageManager->GetRemotePackages())
+				for (auto &remotePackage : packageManager->GetRemotePackages())
 				{
-					auto &remotePackage = remotePackageRef.get();
 					if (remotePackage.author.empty() || remotePackage.description.empty())
 					{
 						CONPRINTF("  %s [%s]\n", remotePackage.name.c_str(), remotePackage.type.c_str());
@@ -594,14 +601,13 @@ namespace plugifyMM
 				}
 				if (arguments.size() > 2)
 				{
-					auto packageRef = packageManager->FindLocalPackage(arguments[2]);
-					if (packageRef.has_value())
+					auto package = packageManager->FindLocalPackage(arguments[2]);
+					if (package.has_value())
 					{
-						auto &package = packageRef->get();
-						CONPRINTF("  Name: %s\n", package.name.c_str());
-						CONPRINTF("  Type: %s\n", package.type.c_str());
-						CONPRINTF("  Version: %d\n", package.version);
-						CONPRINTF("  File: %s\n\n", package.path.string().c_str());
+						CONPRINTF("  Name: %s\n", package->name.c_str());
+						CONPRINTF("  Type: %s\n", package->type.c_str());
+						CONPRINTF("  Version: %d\n", package->version);
+						CONPRINTF("  File: %s\n\n", package->path.string().c_str());
 					}
 					else
 					{
@@ -623,25 +629,24 @@ namespace plugifyMM
 				}
 				if (arguments.size() > 2)
 				{
-					auto packageRef = packageManager->FindRemotePackage(arguments[2]);
-					if (packageRef.has_value())
+					auto package = packageManager->FindRemotePackage(arguments[2]);
+					if (package.has_value())
 					{
-						auto &package = packageRef->get();
-						CONPRINTF("  Name: %s\n", package.name.c_str());
-						CONPRINTF("  Type: %s\n", package.type.c_str());
-						if (!package.author.empty())
+						CONPRINTF("  Name: %s\n", package->name.c_str());
+						CONPRINTF("  Type: %s\n", package->type.c_str());
+						if (!package->author.empty())
 						{
-							CONPRINTF("  Author: %s\n", package.author.c_str());
+							CONPRINTF("  Author: %s\n", package->author.c_str());
 						}
-						if (!package.description.empty())
+						if (!package->description.empty())
 						{
-							CONPRINTF("  Description: %s\n", package.description.c_str());
+							CONPRINTF("  Description: %s\n", package->description.c_str());
 						}
-						if (!package.versions.empty())
+						if (!package->versions.empty())
 						{
 							std::string versions("  Versions: ");
-							std::format_to(std::back_inserter(versions), "{}", package.versions.begin()->version);
-							for (auto it = std::next(package.versions.begin()); it != package.versions.end(); ++it)
+							std::format_to(std::back_inserter(versions), "{}", package->versions.begin()->version);
+							for (auto it = std::next(package->versions.begin()); it != package->versions.end(); ++it)
 							{
 								std::format_to(std::back_inserter(versions), ", {}", it->version);
 							}

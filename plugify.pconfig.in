@@ -6,7 +6,7 @@
         "https://untrustedmodders.github.io/mono-lang-module/mono-lang-module.json",
         "https://untrustedmodders.github.io/go-lang-module/go-lang-module.json",
         "https://untrustedmodders.github.io/py3-12-lang-module/py3-12-lang-module.json",
-        "https://untrustedmodders.github.io/dynohook/dynohook.json",
+        "https://untrustedmodders.github.io/dynhook/dynhook.json",
         "https://untrustedmodders.github.io/dyncall/dyncall.json",
         "https://untrustedmodders.github.io/cs2-sdk-plugin/cs2sdk.json"
     ],

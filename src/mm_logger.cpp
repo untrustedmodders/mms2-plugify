@@ -168,7 +168,7 @@ LoggingResponse_t MMLogger::InternalMessageFormat(LoggingSeverity_t eSeverity, c
 	return eResponse;
 }
 
-void MMLogger::Log(const std::string &message, plugify::Severity severity)
+void MMLogger::Log(std::string_view message, plugify::Severity severity)
 {
 	if (severity <= m_nSeverity)
 	{
@@ -177,38 +177,38 @@ void MMLogger::Log(const std::string &message, plugify::Severity severity)
 			case plugify::Severity::Fatal:
 			{
 				// this->ThrowAssertFormat({__FILE__, __LINE__, __FUNCTION__}, "%s\n", message.c_str());
-				this->WarningFormat(Color(255, 0, 255, 255), "%s\n", message.c_str());
+				this->WarningFormat(Color(255, 0, 255, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Error:
 			{
 				// this->ErrorFormat( Color( 255, 0, 0, 255 ), "%s\n", message.c_str());
-				this->WarningFormat(Color(255, 0, 0, 255), "%s\n", message.c_str());
+				this->WarningFormat(Color(255, 0, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Warning:
 			{
-				this->WarningFormat(Color(255, 127, 0, 255), "%s\n", message.c_str());
+				this->WarningFormat(Color(255, 127, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Info:
 			{
-				this->MessageFormat(Color(255, 255, 0, 255), "%s\n", message.c_str());
+				this->MessageFormat(Color(255, 255, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Debug:
 			{
-				this->MessageFormat(Color(0, 255, 0, 255), "%s\n", message.c_str());
+				this->MessageFormat(Color(0, 255, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Verbose:
 			{
-				this->MessageFormat(Color(255, 255, 255, 255), "%s\n", message.c_str());
+				this->MessageFormat(Color(255, 255, 255, 255), "%s\n", message.data());
 				break;
 			}
 
