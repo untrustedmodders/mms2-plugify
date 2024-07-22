@@ -23,19 +23,6 @@ set(SOURCE_FILES
     src/mm_plugin.h
     src/mm_logger.cpp
     src/mm_logger.h
-    src/logger/detailed.cpp
-    src/logger/detailed.hpp
-    src/logger/error.cpp
-    src/logger/error.hpp
-    src/logger/message.cpp
-    src/logger/message.hpp
-    src/logger/scope.cpp
-    src/logger/scope.hpp
-    src/logger/throw_assert.cpp
-    src/logger/throw_assert.hpp
-    src/logger/warning.cpp
-    src/logger/warning.hpp
-    src/logger/ilogging.hpp
     external/hl2sdk-cs2/tier1/convar.cpp
 )
 

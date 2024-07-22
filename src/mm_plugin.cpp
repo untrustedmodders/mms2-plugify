@@ -55,9 +55,9 @@ namespace plugifyMM
 	PlugifyMMPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
-	#define CONPRINT(x) g_Plugin.m_logger->Message(x)
-	#define CONPRINTE(x) g_Plugin.m_logger->Warning(x)
-	#define CONPRINTF(...) g_Plugin.m_logger->MessageFormat(__VA_ARGS__)
+	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
+	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
+	#define CONPRINTF(...) g_Plugin.m_logger->LogFormat(LS_MESSAGE, __VA_ARGS__)
 
 	template <typename S, typename T, typename F>
 	void Print(const T &t, F &f, std::string_view tab = "  ")

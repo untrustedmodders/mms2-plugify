@@ -3,212 +3,203 @@
 
 using namespace plugifyMM;
 
-MMLogger::MMLogger(const char *pszName, RegisterTagsFunc pfnRegisterTagsFunc, int iFlags, LoggingVerbosity_t eVerbosity, const Color &aDefault)
+MMLogger::MMLogger(const char *name, RegisterTagsFunc registerTagsFunc, int flags, LoggingVerbosity_t verbosity, const Color &defaultColor)
 {
-	this->m_nChannelID = LoggingSystem_RegisterLoggingChannel(pszName, pfnRegisterTagsFunc, iFlags, eVerbosity, aDefault);
+	m_channelID = LoggingSystem_RegisterLoggingChannel(name, registerTagsFunc, flags, verbosity, defaultColor);
 }
 
-bool MMLogger::IsChannelEnabled(LoggingSeverity_t eSeverity) const
+bool MMLogger::IsChannelEnabled(LoggingSeverity_t severity) const
 {
-	return LoggingSystem_IsChannelEnabled(this->m_nChannelID, eSeverity);
+	return LoggingSystem_IsChannelEnabled(m_channelID, severity);
 }
 
-bool MMLogger::IsChannelEnabled(LoggingVerbosity_t eVerbosity) const
+bool MMLogger::IsChannelEnabled(LoggingVerbosity_t verbosity) const
 {
-	return LoggingSystem_IsChannelEnabled(this->m_nChannelID, eVerbosity);
+	return LoggingSystem_IsChannelEnabled(m_channelID, verbosity);
 }
 
 LoggingVerbosity_t MMLogger::GetChannelVerbosity() const
 {
-	return LoggingSystem_GetChannelVerbosity(this->m_nChannelID);
+	return LoggingSystem_GetChannelVerbosity(m_channelID);
 }
 
 Color MMLogger::GetColor() const
 {
 	Color rgba;
-	rgba.SetRawColor(LoggingSystem_GetChannelColor(this->m_nChannelID));
+	rgba.SetRawColor(LoggingSystem_GetChannelColor(m_channelID));
 	return rgba;
 }
 
 LoggingChannelFlags_t MMLogger::GetFlags() const
 {
-	return LoggingSystem_GetChannelFlags(this->m_nChannelID);
+	return LoggingSystem_GetChannelFlags(m_channelID);
 }
 
 void MMLogger::SetSeverity(plugify::Severity severity)
 {
-	m_nSeverity = severity;
+	m_severity = severity;
 }
 
-LoggingResponse_t MMLogger::InternalMessage(LoggingSeverity_t eSeverity, const char *pszContent)
+LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const char *message)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		eResponse = LoggingSystem_LogDirect(this->m_nChannelID, eSeverity, pszContent);
+		response = LoggingSystem_LogDirect(m_channelID, severity, message);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessage(LoggingSeverity_t eSeverity, const Color &aColor, const char *pszContent)
+LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const Color &color, const char *message)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		eResponse = LoggingSystem_LogDirect(this->m_nChannelID, eSeverity, aColor, pszContent);
+		response = LoggingSystem_LogDirect(m_channelID, severity, color, message);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessage(LoggingSeverity_t eSeverity, const LeafCodeInfo_t &aCode, const char *pszContent)
+LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const char *message)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		eResponse = LoggingSystem_LogDirect(this->m_nChannelID, eSeverity, aCode, pszContent);
+		response = LoggingSystem_LogDirect(m_channelID, severity, code, message);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessage(LoggingSeverity_t eSeverity, const LeafCodeInfo_t &aCode, const Color &aColor, const char *pszContent)
+LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const Color &color, const char *message)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		eResponse = LoggingSystem_LogDirect(this->m_nChannelID, eSeverity, aCode, aColor, pszContent);
+		response = LoggingSystem_LogDirect(m_channelID, severity, code, color, message);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessageFormat(LoggingSeverity_t eSeverity, const char *pszFormat, ...)
+LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const char *format, ...)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	char buffer[MAX_LOGGING_MESSAGE_LENGTH];
+	
+	va_list params;
 
-	if (this->IsChannelEnabled(eSeverity))
-	{
-		char sBuffer[1024];
+	va_start(params, format);
+	V_vsnprintf((char *)buffer, sizeof(buffer), format, params);
+	va_end(params);
 
-		va_list aParams;
-
-		va_start(aParams, pszFormat);
-		V_vsnprintf((char *)sBuffer, sizeof(sBuffer), pszFormat, aParams);
-		va_end(aParams);
-
-		eResponse = this->InternalMessage(eSeverity, (const char *)sBuffer);
-	}
-
-	return eResponse;
+	return Log(severity, buffer);
 }
 
-LoggingResponse_t MMLogger::InternalMessageFormat(LoggingSeverity_t eSeverity, const Color &aColor, const char *pszFormat, ...)
+LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const Color &color, const char *format, ...)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
-
-	if (this->IsChannelEnabled(eSeverity))
+	LoggingResponse_t response = LR_ABORT;
+	
+	if (IsChannelEnabled(severity))
 	{
-		char sBuffer[1024];
+		char buffer[1024];
 
-		va_list aParams;
+		va_list params;
 
-		va_start(aParams, pszFormat);
-		V_vsnprintf((char *)sBuffer, sizeof(sBuffer), pszFormat, aParams);
-		va_end(aParams);
+		va_start(params, format);
+		V_vsnprintf((char *)buffer, sizeof(buffer), format, params);
+		va_end(params);
 
-		eResponse = this->InternalMessage(eSeverity, aColor, (const char *)sBuffer);
+		response = Log(severity, color, buffer);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessageFormat(LoggingSeverity_t eSeverity, const LeafCodeInfo_t &aCode, const char *pszFormat, ...)
+LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const char *format, ...)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		char sBuffer[1024];
+		char buffer[1024];
 
-		va_list aParams;
+		va_list params;
 
-		va_start(aParams, pszFormat);
-		V_vsnprintf((char *)sBuffer, sizeof(sBuffer), pszFormat, aParams);
-		va_end(aParams);
+		va_start(params, format);
+		V_vsnprintf((char *)buffer, sizeof(buffer), format, params);
+		va_end(params);
 
-		eResponse = this->InternalMessage(eSeverity, aCode, (const char *)sBuffer);
+		response = Log(severity, code, buffer);
 	}
 
-	return eResponse;
+	return response;
 }
 
-LoggingResponse_t MMLogger::InternalMessageFormat(LoggingSeverity_t eSeverity, const LeafCodeInfo_t &aCode, const Color &aColor, const char *pszFormat, ...)
+LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const Color &color, const char *format, ...)
 {
-	LoggingResponse_t eResponse = LR_ABORT;
+	LoggingResponse_t response = LR_ABORT;
 
-	if (this->IsChannelEnabled(eSeverity))
+	if (IsChannelEnabled(severity))
 	{
-		char sBuffer[1024];
+		char buffer[1024];
 
-		va_list aParams;
+		va_list params;
 
-		va_start(aParams, pszFormat);
-		V_vsnprintf((char *)sBuffer, sizeof(sBuffer), pszFormat, aParams);
-		va_end(aParams);
+		va_start(params, format);
+		V_vsnprintf((char *)buffer, sizeof(buffer), format, params);
+		va_end(params);
 
-		eResponse = this->InternalMessage(eSeverity, aCode, aColor, (const char *)sBuffer);
+		response = Log(severity, code, color, buffer);
 	}
 
-	return eResponse;
+	return response;
 }
 
 void MMLogger::Log(std::string_view message, plugify::Severity severity)
 {
-	if (severity <= m_nSeverity)
+	if (severity <= m_severity)
 	{
 		switch (severity)
 		{
 			case plugify::Severity::Fatal:
 			{
-				// this->ThrowAssertFormat({__FILE__, __LINE__, __FUNCTION__}, "%s\n", message.c_str());
-				this->WarningFormat(Color(255, 0, 255, 255), "%s\n", message.data());
+				LogFormat(LS_ERROR, Color(255, 0, 255, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Error:
 			{
-				// this->ErrorFormat( Color( 255, 0, 0, 255 ), "%s\n", message.c_str());
-				this->WarningFormat(Color(255, 0, 0, 255), "%s\n", message.data());
+				LogFormat(LS_WARNING, Color(255, 0, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Warning:
 			{
-				this->WarningFormat(Color(255, 127, 0, 255), "%s\n", message.data());
+				LogFormat(LS_WARNING, Color(255, 127, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Info:
 			{
-				this->MessageFormat(Color(255, 255, 0, 255), "%s\n", message.data());
+				LogFormat(LS_MESSAGE, Color(255, 255, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Debug:
 			{
-				this->MessageFormat(Color(0, 255, 0, 255), "%s\n", message.data());
+				LogFormat(LS_MESSAGE, Color(0, 255, 0, 255), "%s\n", message.data());
 				break;
 			}
 
 			case plugify::Severity::Verbose:
 			{
-				this->MessageFormat(Color(255, 255, 255, 255), "%s\n", message.data());
+				LogFormat(LS_MESSAGE, Color(255, 255, 255, 255), "%s\n", message.data());
 				break;
 			}
 
