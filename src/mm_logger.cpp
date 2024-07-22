@@ -87,7 +87,7 @@ LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t
 
 	return response;
 }
-
+/*
 LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const char *format, ...)
 {
 	char buffer[MAX_LOGGING_MESSAGE_LENGTH];
@@ -160,7 +160,7 @@ LoggingResponse_t MMLogger::LogFormat(LoggingSeverity_t severity, const LeafCode
 
 	return response;
 }
-
+*/
 void MMLogger::Log(std::string_view message, plugify::Severity severity)
 {
 	if (severity <= m_severity)
@@ -169,37 +169,37 @@ void MMLogger::Log(std::string_view message, plugify::Severity severity)
 		{
 			case plugify::Severity::Fatal:
 			{
-				LogFormat(LS_ERROR, Color(255, 0, 255, 255), "%s\n", message.data());
+				Log(LS_ERROR, Color(255, 0, 255, 255), std::format("{}\n", message).c_str());
 				break;
 			}
 
 			case plugify::Severity::Error:
 			{
-				LogFormat(LS_WARNING, Color(255, 0, 0, 255), "%s\n", message.data());
+				Log(LS_WARNING, Color(255, 0, 0, 255), std::format("{}\n", message).c_str());
 				break;
 			}
 
 			case plugify::Severity::Warning:
 			{
-				LogFormat(LS_WARNING, Color(255, 127, 0, 255), "%s\n", message.data());
+				Log(LS_WARNING, Color(255, 127, 0, 255), std::format("{}\n", message).c_str());
 				break;
 			}
 
 			case plugify::Severity::Info:
 			{
-				LogFormat(LS_MESSAGE, Color(255, 255, 0, 255), "%s\n", message.data());
+				Log(LS_MESSAGE, Color(255, 255, 0, 255),std::format("{}\n", message).c_str());
 				break;
 			}
 
 			case plugify::Severity::Debug:
 			{
-				LogFormat(LS_MESSAGE, Color(0, 255, 0, 255), "%s\n", message.data());
+				Log(LS_MESSAGE, Color(0, 255, 0, 255), std::format("{}\n", message).c_str());
 				break;
 			}
 
 			case plugify::Severity::Verbose:
 			{
-				LogFormat(LS_MESSAGE, Color(255, 255, 255, 255), "%s\n", message.data());
+				Log(LS_MESSAGE, Color(255, 255, 255, 255), std::format("{}\n", message).c_str());
 				break;
 			}
 

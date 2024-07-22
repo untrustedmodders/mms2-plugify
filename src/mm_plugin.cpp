@@ -57,7 +57,7 @@ namespace plugifyMM
 
 	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
 	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
-	#define CONPRINTF(...) g_Plugin.m_logger->LogFormat(LS_MESSAGE, __VA_ARGS__)
+	#define CONPRINTF(...) g_Plugin.m_logger->Log(LS_MESSAGE, std::format(__VA_ARGS__).c_str())
 
 	template <typename S, typename T, typename F>
 	void Print(const T &t, F &f, std::string_view tab = "  ")
@@ -94,54 +94,54 @@ namespace plugifyMM
 	{
 		if (t.GetState() == S::Error)
 		{
-			CONPRINTF("%s has error: %s.\n", name, t.GetError().data());
+			CONPRINTF("{} has error: {}.\n", name, t.GetError());
 		}
 		else
 		{
-			CONPRINTF("%s %zd is %s.\n", name, t.GetId(), f(t.GetState()).data());
+			CONPRINTF("{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
 		}
 		auto getCreatedBy = t.GetDescriptor().GetCreatedBy();
 		if (!getCreatedBy.empty())
 		{
-			CONPRINTF("  Name: \"%s\" by %s\n", t.GetFriendlyName().data(), getCreatedBy.data());
+			CONPRINTF("  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
 		}
 		else
 		{
-			CONPRINTF("  Name: \"%s\"\n", t.GetFriendlyName().data());
+			CONPRINTF("  Name: \"{}\"\n", t.GetFriendlyName());
 		}
 		auto versionName = t.GetDescriptor().GetVersionName();
 		if (!versionName.empty())
 		{
-			CONPRINTF("  Version: %s\n", versionName.data());
+			CONPRINTF("  Version: {}\n", versionName);
 		}
 		else
 		{
-			CONPRINTF("  Version: %d\n", t.GetDescriptor().GetVersion());
+			CONPRINTF("  Version: {}\n", t.GetDescriptor().GetVersion());
 		}
 		auto description = t.GetDescriptor().GetDescription();
 		if (!description.empty())
 		{
-			CONPRINTF("  Description: %s\n", description.data());
+			CONPRINTF("  Description: {}\n", description);
 		}
 		auto createdByURL = t.GetDescriptor().GetCreatedByURL();
 		if (!createdByURL.empty())
 		{
-			CONPRINTF("  URL: %s\n", createdByURL.data());
+			CONPRINTF("  URL: {}\n", createdByURL);
 		}
 		auto docsURL = t.GetDescriptor().GetDocsURL();
 		if (!docsURL.empty())
 		{
-			CONPRINTF("  Docs: %s\n", docsURL.data());
+			CONPRINTF("  Docs: {}\n", docsURL);
 		}
 		auto downloadURL = t.GetDescriptor().GetDownloadURL();
 		if (!downloadURL.empty())
 		{
-			CONPRINTF("  Download: %s\n", downloadURL.data());
+			CONPRINTF("  Download: {}\n", downloadURL);
 		}
 		auto updateURL = t.GetDescriptor().GetUpdateURL();
 		if (!updateURL.empty())
 		{
-			CONPRINTF("  Update: %s\n", updateURL.data());
+			CONPRINTF("  Update: {}\n", updateURL);
 		}
 	}
 
@@ -159,15 +159,15 @@ namespace plugifyMM
 		}
 		catch (const std::invalid_argument &e)
 		{
-			CONPRINTF("Invalid argument: %s", e.what());
+			CONPRINTF("Invalid argument: {}", e.what());
 		}
 		catch (const std::out_of_range &e)
 		{
-			CONPRINTF("Out of range: %s", e.what());
+			CONPRINTF("Out of range: {}", e.what());
 		}
 		catch (const std::exception &e)
 		{
-			CONPRINTF("Conversion error: %s", e.what());
+			CONPRINTF("Conversion error: {}", e.what());
 		}
 
 		return ptrdiff_t(-1);
@@ -248,7 +248,7 @@ namespace plugifyMM
 				CONPRINT(R"(      ____)" "\n");
 				CONPRINT(R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
 				CONPRINT(R"((____|     `._____  )");
-				CONPRINTF("%s\n", copyright.c_str());
+				CONPRINTF("{}", copyright);
 				CONPRINT(R"( ____|       _|___)" "\n");
 				CONPRINT(R"((____|     .'       This program may be freely redistributed under)" "\n");
 				CONPRINT(R"(     |____/         the terms of the GNU General Public License.)" "\n");
@@ -307,7 +307,7 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINTF("Listing %d plugin%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					CONPRINTF("Listing {} plugin{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto &plugin : pluginManager->GetPlugins())
 				{
@@ -329,7 +329,7 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINTF("Listing %d module%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					CONPRINTF("Listing {} module{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto &module : pluginManager->GetModules())
 				{
@@ -350,7 +350,7 @@ namespace plugifyMM
 					if (plugin.has_value())
 					{
 						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString);
-						CONPRINTF("  Language module: %s\n", plugin->GetDescriptor().GetLanguageModule().data());
+						CONPRINTF("  Language module: {}\n", plugin->GetDescriptor().GetLanguageModule());
 						CONPRINT("  Dependencies: \n");
 						for (const auto &reference : plugin->GetDescriptor().GetDependencies())
 						{
@@ -361,14 +361,14 @@ namespace plugifyMM
 							}
 							else
 							{
-								CONPRINTF("    %s <Missing> (v%s)", reference.GetName().data(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()).c_str() : "[latest]");
+								CONPRINTF("    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()) : "[latest]");
 							}
 						}
-						CONPRINTF("  File: %s\n\n", plugin->GetDescriptor().GetEntryPoint().data());
+						CONPRINTF("  File: {}\n\n", plugin->GetDescriptor().GetEntryPoint());
 					}
 					else
 					{
-						CONPRINTF("Plugin %s not found.\n", arguments[2].c_str());
+						CONPRINTF("Plugin {} not found.\n", arguments[2]);
 					}
 				}
 				else
@@ -390,12 +390,12 @@ namespace plugifyMM
 					if (module.has_value())
 					{
 						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString);
-						CONPRINTF("  Language: %s\n", module->GetDescriptor().GetLanguage().data());
-						CONPRINTF("  File: %s\n\n", module->GetFilePath().string().c_str());
+						CONPRINTF("  Language: {}\n", module->GetDescriptor().GetLanguage());
+						CONPRINTF("  File: {}\n\n", module->GetFilePath().string());
 					}
 					else
 					{
-						CONPRINTF("Module %s not found.\n", arguments[2].c_str());
+						CONPRINTF("Module {} not found.\n", arguments[2]);
 					}
 				}
 				else
@@ -555,11 +555,11 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINTF("Listing %d local package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					CONPRINTF("Listing {} local package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto &localPackage : packageManager->GetLocalPackages())
 				{
-					CONPRINTF("  %s [%s] (v%d) at %s\n", localPackage.name.c_str(), localPackage.type.c_str(), localPackage.version, localPackage.path.string().c_str());
+					CONPRINTF("  {} [{}] (v{}) at {}\n", localPackage.name, localPackage.type, localPackage.version, localPackage.path.string());
 				}
 			}
 
@@ -577,17 +577,17 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINTF("Listing %d remote package%s:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					CONPRINTF("Listing {} remote package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
 				}
 				for (auto &remotePackage : packageManager->GetRemotePackages())
 				{
 					if (remotePackage.author.empty() || remotePackage.description.empty())
 					{
-						CONPRINTF("  %s [%s]\n", remotePackage.name.c_str(), remotePackage.type.c_str());
+						CONPRINTF("  {} [{}]\n", remotePackage.name, remotePackage.type);
 					}
 					else
 					{
-						CONPRINTF("  %s [%s] (%s) by %s\n", remotePackage.name.c_str(), remotePackage.type.c_str(), remotePackage.description.c_str(), remotePackage.author.c_str());
+						CONPRINTF("  {} [{}] ({}) by {}\n", remotePackage.name, remotePackage.type, remotePackage.description, remotePackage.author);
 					}
 				}
 			}
@@ -604,14 +604,14 @@ namespace plugifyMM
 					auto package = packageManager->FindLocalPackage(arguments[2]);
 					if (package.has_value())
 					{
-						CONPRINTF("  Name: %s\n", package->name.c_str());
-						CONPRINTF("  Type: %s\n", package->type.c_str());
-						CONPRINTF("  Version: %d\n", package->version);
-						CONPRINTF("  File: %s\n\n", package->path.string().c_str());
+						CONPRINTF("  Name: {}\n", package->name);
+						CONPRINTF("  Type: {}\n", package->type);
+						CONPRINTF("  Version: {}\n", package->version);
+						CONPRINTF("  File: {}\n\n", package->path.string());
 					}
 					else
 					{
-						CONPRINTF("Package %s not found.\n", arguments[2].c_str());
+						CONPRINTF("Package {} not found.\n", arguments[2]);
 					}
 				}
 				else
@@ -632,15 +632,15 @@ namespace plugifyMM
 					auto package = packageManager->FindRemotePackage(arguments[2]);
 					if (package.has_value())
 					{
-						CONPRINTF("  Name: %s\n", package->name.c_str());
-						CONPRINTF("  Type: %s\n", package->type.c_str());
+						CONPRINTF("  Name: {}\n", package->name);
+						CONPRINTF("  Type: {}\n", package->type);
 						if (!package->author.empty())
 						{
-							CONPRINTF("  Author: %s\n", package->author.c_str());
+							CONPRINTF("  Author: {}\n", package->author);
 						}
 						if (!package->description.empty())
 						{
-							CONPRINTF("  Description: %s\n", package->description.c_str());
+							CONPRINTF("  Description: {}\n", package->description);
 						}
 						if (!package->versions.empty())
 						{
@@ -660,7 +660,7 @@ namespace plugifyMM
 					}
 					else
 					{
-						CONPRINTF("Package %s not found.\n", arguments[2].c_str());
+						CONPRINTF("Package {} not found.\n", arguments[2]);
 					}
 				}
 				else
@@ -671,7 +671,7 @@ namespace plugifyMM
 
 			else
 			{
-				CONPRINTF("unknown option: %s\n", arguments[1].c_str());
+				CONPRINTF("unknown option: {}\n", arguments[1]);
 				CONPRINT("usage: plugify <command> [options] [arguments]\n");
 				CONPRINT("Try plugify help or -h for more information.\n");
 			}

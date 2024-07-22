@@ -7,6 +7,7 @@
 #include <tier0/logging.h>
 
 #include <plugify/log.h>
+#include <plugify/compat_format.h>
 
 namespace plugifyMM
 {
@@ -27,10 +28,10 @@ namespace plugifyMM
 		LoggingResponse_t Log(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const char *message);
 		LoggingResponse_t Log(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const Color &color, const char *message);
 
-		LoggingResponse_t LogFormat(LoggingSeverity_t severity, const char *format, ...);
-		LoggingResponse_t LogFormat(LoggingSeverity_t severity, const Color &color, const char *format, ...);
-		LoggingResponse_t LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const char *format, ...);
-		LoggingResponse_t LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const Color &color, const char *format, ...);
+		//LoggingResponse_t LogFormat(LoggingSeverity_t severity, const char *format, ...);
+		//LoggingResponse_t LogFormat(LoggingSeverity_t severity, const Color &color, const char *format, ...);
+		//LoggingResponse_t LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const char *format, ...);
+		//LoggingResponse_t LogFormat(LoggingSeverity_t severity, const LeafCodeInfo_t &code, const Color &color, const char *format, ...);
 
 		/*plugify*/
 		void Log(std::string_view message, plugify::Severity severity);
