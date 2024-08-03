@@ -71,16 +71,17 @@ namespace plugifyMM
 		{
 			std::format_to(std::back_inserter(result), "[{:02d}] {}", t.GetId(), t.GetFriendlyName());
 		}
-		auto versionName = t.GetDescriptor().GetVersionName();
+		auto descriptor = t.GetDescriptor();
+		const auto &versionName = descriptor.GetVersionName();
 		if (!versionName.empty())
 		{
 			std::format_to(std::back_inserter(result), " ({})", versionName);
 		}
 		else
 		{
-			std::format_to(std::back_inserter(result), " (v{})", t.GetDescriptor().GetVersion());
+			std::format_to(std::back_inserter(result), " (v{})", descriptor.GetVersion());
 		}
-		auto createdBy = t.GetDescriptor().GetCreatedBy();
+		const auto &createdBy = descriptor.GetCreatedBy();
 		if (!createdBy.empty())
 		{
 			std::format_to(std::back_inserter(result), " by {}", createdBy);
@@ -100,7 +101,8 @@ namespace plugifyMM
 		{
 			CONPRINTF("{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
 		}
-		auto getCreatedBy = t.GetDescriptor().GetCreatedBy();
+		auto descriptor = t.GetDescriptor();
+		const auto &getCreatedBy = descriptor.GetCreatedBy();
 		if (!getCreatedBy.empty())
 		{
 			CONPRINTF("  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
@@ -109,36 +111,36 @@ namespace plugifyMM
 		{
 			CONPRINTF("  Name: \"{}\"\n", t.GetFriendlyName());
 		}
-		auto versionName = t.GetDescriptor().GetVersionName();
+		const auto &versionName = descriptor.GetVersionName();
 		if (!versionName.empty())
 		{
 			CONPRINTF("  Version: {}\n", versionName);
 		}
 		else
 		{
-			CONPRINTF("  Version: {}\n", t.GetDescriptor().GetVersion());
+			CONPRINTF("  Version: {}\n", descriptor.GetVersion());
 		}
-		auto description = t.GetDescriptor().GetDescription();
+		const auto &description = descriptor.GetDescription();
 		if (!description.empty())
 		{
 			CONPRINTF("  Description: {}\n", description);
 		}
-		auto createdByURL = t.GetDescriptor().GetCreatedByURL();
+		const auto &createdByURL = descriptor.GetCreatedByURL();
 		if (!createdByURL.empty())
 		{
 			CONPRINTF("  URL: {}\n", createdByURL);
 		}
-		auto docsURL = t.GetDescriptor().GetDocsURL();
+		const auto &docsURL = descriptor.GetDocsURL();
 		if (!docsURL.empty())
 		{
 			CONPRINTF("  Docs: {}\n", docsURL);
 		}
-		auto downloadURL = t.GetDescriptor().GetDownloadURL();
+		const auto &downloadURL = descriptor.GetDownloadURL();
 		if (!downloadURL.empty())
 		{
 			CONPRINTF("  Download: {}\n", downloadURL);
 		}
-		auto updateURL = t.GetDescriptor().GetUpdateURL();
+		const auto &updateURL = descriptor.GetUpdateURL();
 		if (!updateURL.empty())
 		{
 			CONPRINTF("  Update: {}\n", updateURL);
@@ -350,9 +352,10 @@ namespace plugifyMM
 					if (plugin.has_value())
 					{
 						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString);
-						CONPRINTF("  Language module: {}\n", plugin->GetDescriptor().GetLanguageModule());
+						auto descriptor = plugin->GetDescriptor();
+						CONPRINTF("  Language module: {}\n", descriptor.GetLanguageModule());
 						CONPRINT("  Dependencies: \n");
-						for (const auto &reference : plugin->GetDescriptor().GetDependencies())
+						for (const auto &reference : descriptor.GetDependencies())
 						{
 							auto dependency = pluginManager->FindPlugin(reference.GetName());
 							if (dependency.has_value())
@@ -364,7 +367,7 @@ namespace plugifyMM
 								CONPRINTF("    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()) : "[latest]");
 							}
 						}
-						CONPRINTF("  File: {}\n\n", plugin->GetDescriptor().GetEntryPoint());
+						CONPRINTF("  File: {}\n\n", descriptor.GetEntryPoint());
 					}
 					else
 					{
@@ -390,7 +393,7 @@ namespace plugifyMM
 					if (module.has_value())
 					{
 						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString);
-						CONPRINTF("  Language: {}\n", module->GetDescriptor().GetLanguage());
+						CONPRINTF("  Language: {}\n", module->GetLanguage());
 						CONPRINTF("  File: {}\n\n", module->GetFilePath().string());
 					}
 					else
