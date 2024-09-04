@@ -80,6 +80,9 @@ if(LINUX)
             GNUC
             COMPILER_GCC
             PLATFORM_64BITS
+            bswap_16=__bswap_16
+            bswap_32=__bswap_32
+            bswap_64=__bswap_64
             _GLIBCXX_USE_CXX11_ABI=0
     )
 elseif(WIN32)
