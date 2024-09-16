@@ -37,6 +37,11 @@ if(LINUX)
 endif()
 add_subdirectory(external/plugify)
 
+if(LINUX)
+    #set(SOURCESDK_MALLOC_OVERRIDE ON CACHE INTERNAL "")
+    set(SOURCESDK_LINK_TIER0 OFF CACHE INTERNAL "")
+    set(SOURCESDK_LINK_STEAMWORKS OFF CACHE INTERNAL "")
+endif()
 add_subdirectory(external/sourcesdk)
 
 # Sources

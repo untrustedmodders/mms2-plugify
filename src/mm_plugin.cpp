@@ -28,8 +28,11 @@
 #include <plugify/plugin_manager.h>
 #include <plugify/package_manager.h>
 
-#include <filesystem>
+#include <sourcehook/sourcehook_impl.h>
+
 #include <chrono>
+#include <filesystem>
+#include <plugify/assembly.h>
 
 std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
 {
@@ -38,10 +41,6 @@ std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
 	std::stringstream ss;
 	ss << std::put_time(std::localtime(&timeT), format.data());
 	return ss.str();
-}
-
-void RegisterTags(LoggingChannelID_t channelID)
-{
 }
 
 namespace plugifyMM
@@ -55,9 +54,9 @@ namespace plugifyMM
 	PlugifyMMPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
-	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
-	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
-	#define CONPRINTF(...) g_Plugin.m_logger->Log(LS_MESSAGE, std::format(__VA_ARGS__).c_str())
+	#define CONPRINT(x) META_CONPRINT(x)
+	#define CONPRINTE(x) META_CONPRINT(x)
+	#define CONPRINTF(...) META_CONPRINT(std::format(__VA_ARGS__).c_str())
 
 	template <typename S, typename T, typename F>
 	void Print(const T &t, F &f, std::string_view tab = "  ")
@@ -688,6 +687,12 @@ namespace plugifyMM
 
 	bool PlugifyMMPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 	{
+#if PLUGIFY_PLATFORM_LINUX
+		//const plugify::Assembly libc(LIBC_SO, plugify::LoadFlag::Lazy);
+		//std::malloc = libc.GetFunctionByName("malloc").CCast<MallocFunc>();
+		//std::free = libc.GetFunctionByName("free").CCast<FreeFunc>();
+#endif
+
 		PLUGIN_SAVEVARS();
 
 		GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
@@ -703,7 +708,7 @@ namespace plugifyMM
 
 		m_context = plugify::MakePlugify();
 
-		m_logger = std::make_shared<MMLogger>("plugify", &RegisterTags);
+		m_logger = std::make_shared<MMLogger>();
 		m_logger->SetSeverity(plugify::Severity::Info);
 		m_context->SetLogger(m_logger);
 
