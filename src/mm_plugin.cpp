@@ -393,7 +393,7 @@ namespace plugifyMM
 					{
 						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString);
 						CONPRINTF("  Language: {}\n", module->GetLanguage());
-						CONPRINTF("  File: {}\n\n", module->GetFilePath().string());
+						CONPRINTF("  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
 					}
 					else
 					{
@@ -687,12 +687,6 @@ namespace plugifyMM
 
 	bool PlugifyMMPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 	{
-#if PLUGIFY_PLATFORM_LINUX
-		//const plugify::Assembly libc(LIBC_SO, plugify::LoadFlag::Lazy);
-		//std::malloc = libc.GetFunctionByName("malloc").CCast<MallocFunc>();
-		//std::free = libc.GetFunctionByName("free").CCast<FreeFunc>();
-#endif
-
 		PLUGIN_SAVEVARS();
 
 		GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
@@ -827,4 +821,9 @@ SMM_API PluginId Plugify_Id()
 SMM_API SourceHook::ISourceHook *Plugify_SourceHook()
 {
 	return plugifyMM::g_SHPtr;
+}
+
+SMM_API bool Plugify_SourcePatched(void *vfnptr)
+{
+	return plugifyMM::g_SHPtr->GetOrigVfnPtrEntry(vfnptr) != nullptr;
 }
