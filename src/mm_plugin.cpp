@@ -360,6 +360,8 @@ namespace plugifyMM
 							}
 						}
 						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", descriptor.GetEntryPoint());
+
+						CONPRINT(sMessage.c_str());
 					}
 					else
 					{
@@ -389,6 +391,8 @@ namespace plugifyMM
 						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString, sMessage);
 						std::format_to(std::back_inserter(sMessage), "  Language: {}\n", module->GetLanguage());
 						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
+
+						CONPRINT(sMessage.c_str());
 					}
 					else
 					{
