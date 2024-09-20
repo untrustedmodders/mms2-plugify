@@ -28,11 +28,8 @@
 #include <plugify/plugin_manager.h>
 #include <plugify/package_manager.h>
 
-#include <sourcehook/sourcehook_impl.h>
-
-#include <chrono>
 #include <filesystem>
-#include <plugify/assembly.h>
+#include <chrono>
 
 std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
 {
@@ -41,6 +38,10 @@ std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
 	std::stringstream ss;
 	ss << std::put_time(std::localtime(&timeT), format.data());
 	return ss.str();
+}
+
+void RegisterTags(LoggingChannelID_t channelID)
+{
 }
 
 namespace plugifyMM
@@ -54,9 +55,9 @@ namespace plugifyMM
 	PlugifyMMPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
-	#define CONPRINT(x) META_CONPRINT(x)
-	#define CONPRINTE(x) META_CONPRINT(x)
-	#define CONPRINTF(...) META_CONPRINT(std::format(__VA_ARGS__).c_str())
+	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
+	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
+	#define CONPRINTF(...) g_Plugin.m_logger->Log(LS_MESSAGE, std::format(__VA_ARGS__).c_str())
 
 	template <typename S, typename T, typename F>
 	void Print(const T &t, F &f, std::string_view tab = "  ")
@@ -702,7 +703,7 @@ namespace plugifyMM
 
 		m_context = plugify::MakePlugify();
 
-		m_logger = std::make_shared<MMLogger>();
+		m_logger = std::make_shared<MMLogger>("plugify", &RegisterTags);
 		m_logger->SetSeverity(plugify::Severity::Info);
 		m_context->SetLogger(m_logger);
 
@@ -821,9 +822,4 @@ SMM_API PluginId Plugify_Id()
 SMM_API SourceHook::ISourceHook *Plugify_SourceHook()
 {
 	return plugifyMM::g_SHPtr;
-}
-
-SMM_API bool Plugify_SourcePatched(void *vfnptr)
-{
-	return plugifyMM::g_SHPtr->GetOrigVfnPtrEntry(vfnptr) != nullptr;
 }
