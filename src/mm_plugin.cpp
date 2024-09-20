@@ -55,9 +55,8 @@ namespace plugifyMM
 	PlugifyMMPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
-	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
-	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
-	#define CONPRINTF(...) g_Plugin.m_logger->Log(LS_MESSAGE, std::format(__VA_ARGS__).c_str())
+	#define CONPRINT(x) g_Plugin.m_logger->Message(x)
+	#define CONPRINTE(x) g_Plugin.m_logger->Warning(x)
 
 	template <typename S, typename T, typename F>
 	void Print(const T &t, F &f, std::string_view tab = "  ")
@@ -90,60 +89,61 @@ namespace plugifyMM
 		CONPRINT(result.c_str());
 	}
 
-	template <typename S, typename T, typename F>
-	void Print(const char *name, const T &t, F &f)
+	template <typename S, typename T, typename F, typename O>
+	void Print(const char *name, const T &t, F &f, O &s)
 	{
 		if (t.GetState() == S::Error)
 		{
-			CONPRINTF("{} has error: {}.\n", name, t.GetError());
+			std::format_to(std::back_inserter(s), "{} has error: {}.\n", name, t.GetError());
 		}
 		else
 		{
-			CONPRINTF("{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
+			std::format_to(std::back_inserter(s), "{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
 		}
 		auto descriptor = t.GetDescriptor();
 		const auto &getCreatedBy = descriptor.GetCreatedBy();
 		if (!getCreatedBy.empty())
 		{
-			CONPRINTF("  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
+			std::format_to(std::back_inserter(s), "  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
 		}
 		else
 		{
-			CONPRINTF("  Name: \"{}\"\n", t.GetFriendlyName());
+			std::format_to(std::back_inserter(s), "  Name: \"{}\"\n", t.GetFriendlyName());
 		}
+
 		const auto &versionName = descriptor.GetVersionName();
 		if (!versionName.empty())
 		{
-			CONPRINTF("  Version: {}\n", versionName);
+			std::format_to(std::back_inserter(s), "  Version: {}\n", versionName);
 		}
 		else
 		{
-			CONPRINTF("  Version: {}\n", descriptor.GetVersion());
+			std::format_to(std::back_inserter(s), "  Version: {}\n", descriptor.GetVersion());
 		}
 		const auto &description = descriptor.GetDescription();
 		if (!description.empty())
 		{
-			CONPRINTF("  Description: {}\n", description);
+			std::format_to(std::back_inserter(s), "  Description: {}\n", description);
 		}
 		const auto &createdByURL = descriptor.GetCreatedByURL();
 		if (!createdByURL.empty())
 		{
-			CONPRINTF("  URL: {}\n", createdByURL);
+			std::format_to(std::back_inserter(s), "  URL: {}\n", createdByURL);
 		}
 		const auto &docsURL = descriptor.GetDocsURL();
 		if (!docsURL.empty())
 		{
-			CONPRINTF("  Docs: {}\n", docsURL);
+			std::format_to(std::back_inserter(s), "  Docs: {}\n", docsURL);
 		}
 		const auto &downloadURL = descriptor.GetDownloadURL();
 		if (!downloadURL.empty())
 		{
-			CONPRINTF("  Download: {}\n", downloadURL);
+			std::format_to(std::back_inserter(s), "  Download: {}\n", downloadURL);
 		}
 		const auto &updateURL = descriptor.GetUpdateURL();
 		if (!updateURL.empty())
 		{
-			CONPRINTF("  Update: {}\n", updateURL);
+			std::format_to(std::back_inserter(s), "  Update: {}\n", updateURL);
 		}
 	}
 
@@ -161,15 +161,15 @@ namespace plugifyMM
 		}
 		catch (const std::invalid_argument &e)
 		{
-			CONPRINTF("Invalid argument: {}", e.what());
+			CONPRINT(std::format("Invalid argument: {}\n", e.what()).c_str());
 		}
 		catch (const std::out_of_range &e)
 		{
-			CONPRINTF("Out of range: {}", e.what());
+			CONPRINT(std::format("Out of range: {}\n", e.what()).c_str());
 		}
 		catch (const std::exception &e)
 		{
-			CONPRINTF("Conversion error: {}", e.what());
+			CONPRINT(std::format("Conversion error: {}\n", e.what()).c_str());
 		}
 
 		return ptrdiff_t(-1);
@@ -205,55 +205,54 @@ namespace plugifyMM
 
 		if (arguments.size() > 1)
 		{
+			std::string sMessage;
 
 			if (arguments[1] == "help" || arguments[1] == "-h")
 			{
-				CONPRINT("Plugify Menu\n");
-				CONPRINT("(c) untrustedmodders\n");
-				CONPRINT("https://github.com/untrustedmodders\n");
-				CONPRINT("usage: plugify <command> [options] [arguments]\n");
-				CONPRINT("  help           - Show help\n");
-				CONPRINT("  version        - Version information\n");
-				CONPRINT("Plugin Manager commands:\n");
-				CONPRINT("  load           - Load plugin manager\n");
-				CONPRINT("  unload         - Unload plugin manager\n");
-				CONPRINT("  modules        - List running modules\n");
-				CONPRINT("  plugins        - List running plugins\n");
-				CONPRINT("  plugin <name>  - Show information about a module\n");
-				CONPRINT("  module <name>  - Show information about a plugin\n");
-				CONPRINT("Plugin Manager options:\n");
-				CONPRINT("  -h, --help     - Show help\n");
-				CONPRINT("  -u, --uuid     - Use index instead of name\n");
-				CONPRINT("Package Manager commands:\n");
-				CONPRINT("  install <name> - Packages to install (space separated)\n");
-				CONPRINT("  remove <name>  - Packages to remove (space separated)\n");
-				CONPRINT("  update <name>  - Packages to update (space separated)\n");
-				CONPRINT("  list           - Print all local packages\n");
-				CONPRINT("  query          - Print all remote packages\n");
-				CONPRINT("  show  <name>   - Show information about local package\n");
-				CONPRINT("  search <name>  - Search information about remote package\n");
-				CONPRINT("  snapshot       - Snapshot packages into manifest\n");
-				CONPRINT("  repo <url>     - Add repository to config\n");
-				CONPRINT("Package Manager options:\n");
-				CONPRINT("  -h, --help     - Show help\n");
-				CONPRINT("  -a, --all      - Install/remove/update all packages\n");
-				CONPRINT("  -f, --file     - Packages to install (from file manifest)\n");
-				CONPRINT("  -l, --link     - Packages to install (from HTTP manifest)\n");
-				CONPRINT("  -m, --missing  - Install missing packages\n");
-				CONPRINT("  -c, --conflict - Remove conflict packages\n");
-				CONPRINT("  -i, --ignore   - Ignore missing or conflict packages\n");
+				CONPRINT("Plugify Menu\n"
+				         "(c) untrustedmodders\n"
+				         "https://github.com/untrustedmodders\n"
+				         "usage: plugify <command> [options] [arguments]\n"
+				         "  help           - Show help\n"
+				         "  version        - Version information\n"
+				         "Plugin Manager commands:\n"
+				         "  load           - Load plugin manager\n"
+				         "  unload         - Unload plugin manager\n"
+				         "  modules        - List running modules\n"
+				         "  plugins        - List running plugins\n"
+				         "  plugin <name>  - Show information about a module\n"
+				         "  module <name>  - Show information about a plugin\n"
+				         "Plugin Manager options:\n"
+				         "  -h, --help     - Show help\n"
+				         "  -u, --uuid     - Use index instead of name\n"
+				         "Package Manager commands:\n"
+				         "  install <name> - Packages to install (space separated)\n"
+				         "  remove <name>  - Packages to remove (space separated)\n"
+				         "  update <name>  - Packages to update (space separated)\n"
+				         "  list           - Print all local packages\n"
+				         "  query          - Print all remote packages\n"
+				         "  show  <name>   - Show information about local package\n"
+				         "  search <name>  - Search information about remote package\n"
+				         "  snapshot       - Snapshot packages into manifest\n"
+				         "  repo <url>     - Add repository to config\n"
+				         "Package Manager options:\n"
+				         "  -h, --help     - Show help\n"
+				         "  -a, --all      - Install/remove/update all packages\n"
+				         "  -f, --file     - Packages to install (from file manifest)\n"
+				         "  -l, --link     - Packages to install (from HTTP manifest)\n"
+				         "  -m, --missing  - Install missing packages\n"
+				         "  -c, --conflict - Remove conflict packages\n"
+				         "  -i, --ignore   - Ignore missing or conflict packages\n");
 			}
 
 			else if (arguments[1] == "version" || arguments[1] == "-v")
 			{
-				static std::string copyright = std::format("Copyright (C) 2023-{}{}{}{} Untrusted Modders Team\n", __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10]);
-				CONPRINT(R"(      ____)" "\n");
-				CONPRINT(R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n");
-				CONPRINT(R"((____|     `._____  )");
-				CONPRINTF("{}", copyright);
-				CONPRINT(R"( ____|       _|___)" "\n");
-				CONPRINT(R"((____|     .'       This program may be freely redistributed under)" "\n");
-				CONPRINT(R"(     |____/         the terms of the GNU General Public License.)" "\n");
+				CONPRINT(R"(      ____)" "\n"
+				         R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n"
+				         R"((____|     `._____  )" "Copyright (C) 2023-" PLUGIFY_PROJECT_YEAR " Untrusted Modders Team\n"
+				         R"( ____|       _|___)" "\n"
+				         R"((____|     .'       This program may be freely redistributed under)" "\n"
+				         R"(     |____/         the terms of the GNU General Public License.)" "\n");
 			}
 
 			else if (arguments[1] == "load")
@@ -262,23 +261,23 @@ namespace plugifyMM
 				{
 					if (packageManager->HasMissedPackages())
 					{
-						CONPRINT("Plugin manager has missing packages, run 'install --missing' to resolve issues.");
+						CONPRINT("Plugin manager has missing packages, run 'install --missing' to resolve issues.\n");
 						return;
 					}
 					if (packageManager->HasConflictedPackages())
 					{
-						CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.");
+						CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.\n");
 						return;
 					}
 				}
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("Plugin manager already loaded.");
+					CONPRINT("Plugin manager already loaded.\n");
 				}
 				else
 				{
 					pluginManager->Initialize();
-					CONPRINT("Plugin manager was loaded.");
+					CONPRINT("Plugin manager was loaded.\n");
 				}
 			}
 
@@ -286,12 +285,12 @@ namespace plugifyMM
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("Plugin manager already unloaded.");
+					CONPRINT("Plugin manager already unloaded.\n");
 				}
 				else
 				{
 					pluginManager->Terminate();
-					CONPRINT("Plugin manager was unloaded.");
+					CONPRINT("Plugin manager was unloaded.\n");
 				}
 			}
 
@@ -299,44 +298,36 @@ namespace plugifyMM
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("You must load plugin manager before query any information from it.");
+					CONPRINT("You must load plugin manager before query any information from it.\n");
 					return;
 				}
+
 				auto count = pluginManager->GetPlugins().size();
-				if (!count)
-				{
-					CONPRINT("No plugins loaded.\n");
-				}
-				else
-				{
-					CONPRINTF("Listing {} plugin{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
-				}
+				std::string sMessage = count ? std::format("Listing {} plugin{}:\n", static_cast<int>(count), (count > 1) ? "s" : "") : std::string("No plugins loaded.\n");
+
 				for (auto &plugin : pluginManager->GetPlugins())
 				{
-					Print<plugify::PluginState>(plugin, plugify::PluginUtils::ToString);
+					Print<plugify::PluginState>(plugin, plugify::PluginUtils::ToString, sMessage);
 				}
+
+				CONPRINT(sMessage.c_str());
 			}
 
 			else if (arguments[1] == "modules")
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("You must load plugin manager before query any information from it.");
+					CONPRINT("You must load plugin manager before query any information from it.\n");
 					return;
 				}
 				auto count = pluginManager->GetModules().size();
-				if (!count)
-				{
-					CONPRINT("No modules loaded.\n");
-				}
-				else
-				{
-					CONPRINTF("Listing {} module{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
-				}
+				std::string sMessage = count ? std::format("Listing {} module{}:\n", static_cast<int>(count), (count > 1) ? "s" : "") : std::string("No modules loaded.\n");
 				for (auto &module : pluginManager->GetModules())
 				{
-					Print<plugify::ModuleState>(module, plugify::ModuleUtils::ToString);
+					Print<plugify::ModuleState>(module, plugify::ModuleUtils::ToString, sMessage);
 				}
+
+				CONPRINT(sMessage.c_str());
 			}
 
 			else if (arguments[1] == "plugin")
@@ -345,16 +336,17 @@ namespace plugifyMM
 				{
 					if (!pluginManager->IsInitialized())
 					{
-						CONPRINT("You must load plugin manager before query any information from it.");
+						CONPRINT("You must load plugin manager before query any information from it.\n");
 						return;
 					}
 					auto plugin = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
 					if (plugin.has_value())
 					{
-						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString);
+						std::string sMessage;
+						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString, sMessage);
 						auto descriptor = plugin->GetDescriptor();
-						CONPRINTF("  Language module: {}\n", descriptor.GetLanguageModule());
-						CONPRINT("  Dependencies: \n");
+						std::format_to(std::back_inserter(sMessage), "  Language module: {}\n", descriptor.GetLanguageModule());
+						sMessage += "  Dependencies: \n";
 						for (const auto &reference : descriptor.GetDependencies())
 						{
 							auto dependency = pluginManager->FindPlugin(reference.GetName());
@@ -364,14 +356,14 @@ namespace plugifyMM
 							}
 							else
 							{
-								CONPRINTF("    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()) : "[latest]");
+								std::format_to(std::back_inserter(sMessage), "    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()) : "[latest]");
 							}
 						}
-						CONPRINTF("  File: {}\n\n", descriptor.GetEntryPoint());
+						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", descriptor.GetEntryPoint());
 					}
 					else
 					{
-						CONPRINTF("Plugin {} not found.\n", arguments[2]);
+						CONPRINT(std::format("Plugin {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
@@ -392,13 +384,15 @@ namespace plugifyMM
 					auto module = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
 					if (module.has_value())
 					{
-						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString);
-						CONPRINTF("  Language: {}\n", module->GetLanguage());
-						CONPRINTF("  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
+						std::string sMessage;
+
+						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString, sMessage);
+						std::format_to(std::back_inserter(sMessage), "  Language: {}\n", module->GetLanguage());
+						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
 					}
 					else
 					{
-						CONPRINTF("Module {} not found.\n", arguments[2]);
+						CONPRINT(std::format("Module {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
@@ -421,7 +415,7 @@ namespace plugifyMM
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.");
+					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 
@@ -439,7 +433,7 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINT("You must give at least one repository to add.");
+					CONPRINT("You must give at least one repository to add.\n");
 				}
 			}
 
@@ -558,11 +552,11 @@ namespace plugifyMM
 				}
 				else
 				{
-					CONPRINTF("Listing {} local package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
+					CONPRINT(std::format("Listing {} local package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "").c_str());
 				}
 				for (auto &localPackage : packageManager->GetLocalPackages())
 				{
-					CONPRINTF("  {} [{}] (v{}) at {}\n", localPackage.name, localPackage.type, localPackage.version, localPackage.path.string());
+					CONPRINT(std::format("  {} [{}] (v{}) at {}\n", localPackage.name, localPackage.type, localPackage.version, localPackage.path.string()).c_str());
 				}
 			}
 
@@ -574,25 +568,20 @@ namespace plugifyMM
 					return;
 				}
 				auto count = packageManager->GetRemotePackages().size();
-				if (!count)
-				{
-					CONPRINT("No remote packages found.\n");
-				}
-				else
-				{
-					CONPRINTF("Listing {} remote package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "");
-				}
+				std::string sMessage = count ? std::format("Listing {} remote package{}:\n", static_cast<int>(count), (count > 1) ? "s" : "") : std::string("No remote packages found.\n");
 				for (auto &remotePackage : packageManager->GetRemotePackages())
 				{
 					if (remotePackage.author.empty() || remotePackage.description.empty())
 					{
-						CONPRINTF("  {} [{}]\n", remotePackage.name, remotePackage.type);
+						std::format_to(std::back_inserter(sMessage), "  {} [{}]\n", remotePackage.name, remotePackage.type);
 					}
 					else
 					{
-						CONPRINTF("  {} [{}] ({}) by {}\n", remotePackage.name, remotePackage.type, remotePackage.description, remotePackage.author);
+						std::format_to(std::back_inserter(sMessage), "  {} [{}] ({}) by {}\n", remotePackage.name, remotePackage.type, remotePackage.description, remotePackage.author);
 					}
 				}
+
+				CONPRINT(sMessage.c_str());
 			}
 
 			else if (arguments[1] == "show")
@@ -607,14 +596,14 @@ namespace plugifyMM
 					auto package = packageManager->FindLocalPackage(arguments[2]);
 					if (package.has_value())
 					{
-						CONPRINTF("  Name: {}\n", package->name);
-						CONPRINTF("  Type: {}\n", package->type);
-						CONPRINTF("  Version: {}\n", package->version);
-						CONPRINTF("  File: {}\n\n", package->path.string());
+						CONPRINT(std::format("  Name: {}\n"
+						                     "  Type: {}\n"
+						                     "  Version: {}\n"
+						                     "  File: {}\n\n", package->name, package->type, package->version, package->path.string()).c_str());
 					}
 					else
 					{
-						CONPRINTF("Package {} not found.\n", arguments[2]);
+						CONPRINT(std::format("Package {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
@@ -635,15 +624,17 @@ namespace plugifyMM
 					auto package = packageManager->FindRemotePackage(arguments[2]);
 					if (package.has_value())
 					{
-						CONPRINTF("  Name: {}\n", package->name);
-						CONPRINTF("  Type: {}\n", package->type);
+						std::string sMessage;
+
+						std::format_to(std::back_inserter(sMessage), "  Name: {}\n", package->name);
+						std::format_to(std::back_inserter(sMessage), "  Type: {}\n", package->type);
 						if (!package->author.empty())
 						{
-							CONPRINTF("  Author: {}\n", package->author);
+							std::format_to(std::back_inserter(sMessage), "  Author: {}\n", package->author);
 						}
 						if (!package->description.empty())
 						{
-							CONPRINTF("  Description: {}\n", package->description);
+							std::format_to(std::back_inserter(sMessage), "  Description: {}\n", package->description);
 						}
 						if (!package->versions.empty())
 						{
@@ -654,7 +645,9 @@ namespace plugifyMM
 								std::format_to(std::back_inserter(versions), ", {}", it->version);
 							}
 							std::format_to(std::back_inserter(versions), "\n\n");
-							CONPRINT(versions.c_str());
+							sMessage += versions;
+
+							CONPRINT(sMessage.c_str());
 						}
 						else
 						{
@@ -663,7 +656,7 @@ namespace plugifyMM
 					}
 					else
 					{
-						CONPRINTF("Package {} not found.\n", arguments[2]);
+						CONPRINT(std::format("Package {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
@@ -674,15 +667,17 @@ namespace plugifyMM
 
 			else
 			{
-				CONPRINTF("unknown option: {}\n", arguments[1]);
-				CONPRINT("usage: plugify <command> [options] [arguments]\n");
-				CONPRINT("Try plugify help or -h for more information.\n");
+				std::string sMessage = std::format("unknown option: {}\n", arguments[1]);
+				sMessage += "usage: plugify <command> [options] [arguments]\n"
+				           "Try plugify help or -h for more information.\n";
+
+				CONPRINT(sMessage.c_str());
 			}
 		}
 		else
 		{
-			CONPRINT("usage: plugify <command> [options] [arguments]\n");
-			CONPRINT("Try plugify help or -h for more information.\n");
+			CONPRINT("usage: plugify <command> [options] [arguments]\n"
+			         "Try plugify help or -h for more information.\n");
 		}
 	}
 

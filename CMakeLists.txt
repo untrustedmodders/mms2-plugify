@@ -4,6 +4,23 @@ if(POLICY CMP0092)
     cmake_policy(SET CMP0092 NEW) # Don't add -W3 warning level by default.
 endif()
 
+set(EXTERNAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+
+function(set_or_external_dir VAR_NAME DEFAULT_DIR)
+    if(${VAR_NAME})
+        file(TO_CMAKE_PATH "${${VAR_NAME}}" ${VAR_NAME})
+    else()
+        set(${VAR_NAME} "${EXTERNAL_DIR}/${DEFAULT_DIR}")
+    endif()
+
+    set(${VAR_NAME} "${${VAR_NAME}}" PARENT_SCOPE)
+endfunction()
+
+string(TIMESTAMP PROJECT_BUILD_DATE_YEAR "%Y")
+
+set_or_external_dir(LOGGER_DIR "logger")
+
+include(cmake/logger.cmake)
 
 project(cs2-plugify VERSION 1.0.0.0 DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
 
@@ -52,6 +69,8 @@ set(SOURCESDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/sourcesdk)
 set(METAMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/metamod-source)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+        ${LOGGER_INCLUDE_DIRS}
+
         ${SOURCESDK_DIR}
         ${SOURCESDK_DIR}/common
         ${SOURCESDK_DIR}/game/shared
@@ -71,6 +90,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+        PLUGIFY_PROJECT_YEAR="${PROJECT_BUILD_DATE_YEAR}"
         PLUGIFY_PROJECT_NAME="${PROJECT_NAME}"
         PLUGIFY_PROJECT_DESCRIPTION="${CMAKE_PROJECT_DESCRIPTION}"
         PLUGIFY_PROJECT_HOMEPAGE_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
@@ -106,7 +126,7 @@ elseif(WIN32)
     #set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-set(PLUGIFY_LINK_LIBRARIES plugify::plugify sourcesdk miniz)
+set(PLUGIFY_LINK_LIBRARIES ${LOGGER_BINARY_DIR} plugify::plugify sourcesdk miniz)
 
 if(WIN32)
     set(PLUGIFY_LINK_LIBRARIES ${PLUGIFY_LINK_LIBRARIES} winhttp.lib)
