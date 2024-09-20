@@ -30,6 +30,7 @@
 
 #include <filesystem>
 #include <chrono>
+#include <type_traits>
 
 std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
 {
@@ -58,92 +59,90 @@ namespace plugifyMM
 	#define CONPRINT(x) g_Plugin.m_logger->Message(x)
 	#define CONPRINTE(x) g_Plugin.m_logger->Warning(x)
 
-	template <typename S, typename T, typename F>
-	void Print(const T &t, F &f, std::string_view tab = "  ")
+	template <typename S, typename T, typename F> requires (std::is_function_v<F>)
+	void Print(std::string& out, const T &t, F &f, std::string_view tab = "  ")
 	{
-		std::string result(tab);
+		out += tab;
 		if (t.GetState() != S::Loaded)
 		{
-			std::format_to(std::back_inserter(result), "[{:02d}] <{}> {}", t.GetId(), f(t.GetState()), t.GetFriendlyName());
+			std::format_to(std::back_inserter(out), "[{:02d}] <{}> {}", t.GetId(), f(t.GetState()), t.GetFriendlyName());
 		}
 		else
 		{
-			std::format_to(std::back_inserter(result), "[{:02d}] {}", t.GetId(), t.GetFriendlyName());
+			std::format_to(std::back_inserter(out), "[{:02d}] {}", t.GetId(), t.GetFriendlyName());
 		}
 		auto descriptor = t.GetDescriptor();
 		const auto &versionName = descriptor.GetVersionName();
 		if (!versionName.empty())
 		{
-			std::format_to(std::back_inserter(result), " ({})", versionName);
+			std::format_to(std::back_inserter(out), " ({})", versionName);
 		}
 		else
 		{
-			std::format_to(std::back_inserter(result), " (v{})", descriptor.GetVersion());
+			std::format_to(std::back_inserter(out), " (v{})", descriptor.GetVersion());
 		}
 		const auto &createdBy = descriptor.GetCreatedBy();
 		if (!createdBy.empty())
 		{
-			std::format_to(std::back_inserter(result), " by {}", createdBy);
+			std::format_to(std::back_inserter(out), " by {}", createdBy);
 		}
-		std::format_to(std::back_inserter(result), "\n");
-		CONPRINT(result.c_str());
+		out += '\n';
 	}
 
-	template <typename S, typename T, typename F, typename O>
-	void Print(const char *name, const T &t, F &f, O &s)
+	template <typename S, typename T, typename F> requires (std::is_function_v<F>)
+	void Print(std::string& out, const char *name, const T &t, F &f)
 	{
 		if (t.GetState() == S::Error)
 		{
-			std::format_to(std::back_inserter(s), "{} has error: {}.\n", name, t.GetError());
+			std::format_to(std::back_inserter(out), "{} has error: {}.\n", name, t.GetError());
 		}
 		else
 		{
-			std::format_to(std::back_inserter(s), "{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
+			std::format_to(std::back_inserter(out), "{} {} is {}.\n", name, t.GetId(), f(t.GetState()));
 		}
 		auto descriptor = t.GetDescriptor();
 		const auto &getCreatedBy = descriptor.GetCreatedBy();
 		if (!getCreatedBy.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
+			std::format_to(std::back_inserter(out), "  Name: \"{}\" by {}\n", t.GetFriendlyName(), getCreatedBy);
 		}
 		else
 		{
-			std::format_to(std::back_inserter(s), "  Name: \"{}\"\n", t.GetFriendlyName());
+			std::format_to(std::back_inserter(out), "  Name: \"{}\"\n", t.GetFriendlyName());
 		}
-
 		const auto &versionName = descriptor.GetVersionName();
 		if (!versionName.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Version: {}\n", versionName);
+			std::format_to(std::back_inserter(out), "  Version: {}\n", versionName);
 		}
 		else
 		{
-			std::format_to(std::back_inserter(s), "  Version: {}\n", descriptor.GetVersion());
+			std::format_to(std::back_inserter(out), "  Version: {}\n", descriptor.GetVersion());
 		}
 		const auto &description = descriptor.GetDescription();
 		if (!description.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Description: {}\n", description);
+			std::format_to(std::back_inserter(out), "  Description: {}\n", description);
 		}
 		const auto &createdByURL = descriptor.GetCreatedByURL();
 		if (!createdByURL.empty())
 		{
-			std::format_to(std::back_inserter(s), "  URL: {}\n", createdByURL);
+			std::format_to(std::back_inserter(out), "  URL: {}\n", createdByURL);
 		}
 		const auto &docsURL = descriptor.GetDocsURL();
 		if (!docsURL.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Docs: {}\n", docsURL);
+			std::format_to(std::back_inserter(out), "  Docs: {}\n", docsURL);
 		}
 		const auto &downloadURL = descriptor.GetDownloadURL();
 		if (!downloadURL.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Download: {}\n", downloadURL);
+			std::format_to(std::back_inserter(out), "  Download: {}\n", downloadURL);
 		}
 		const auto &updateURL = descriptor.GetUpdateURL();
 		if (!updateURL.empty())
 		{
-			std::format_to(std::back_inserter(s), "  Update: {}\n", updateURL);
+			std::format_to(std::back_inserter(out), "  Update: {}\n", updateURL);
 		}
 	}
 
@@ -205,8 +204,6 @@ namespace plugifyMM
 
 		if (arguments.size() > 1)
 		{
-			std::string sMessage;
-
 			if (arguments[1] == "help" || arguments[1] == "-h")
 			{
 				CONPRINT("Plugify Menu\n"
@@ -307,7 +304,7 @@ namespace plugifyMM
 
 				for (auto &plugin : pluginManager->GetPlugins())
 				{
-					Print<plugify::PluginState>(plugin, plugify::PluginUtils::ToString, sMessage);
+					Print<plugify::PluginState>(sMessage, plugin, plugify::PluginUtils::ToString);
 				}
 
 				CONPRINT(sMessage.c_str());
@@ -324,7 +321,7 @@ namespace plugifyMM
 				std::string sMessage = count ? std::format("Listing {} module{}:\n", static_cast<int>(count), (count > 1) ? "s" : "") : std::string("No modules loaded.\n");
 				for (auto &module : pluginManager->GetModules())
 				{
-					Print<plugify::ModuleState>(module, plugify::ModuleUtils::ToString, sMessage);
+					Print<plugify::ModuleState>(sMessage, module, plugify::ModuleUtils::ToString);
 				}
 
 				CONPRINT(sMessage.c_str());
@@ -343,7 +340,7 @@ namespace plugifyMM
 					if (plugin.has_value())
 					{
 						std::string sMessage;
-						Print<plugify::PluginState>("Plugin", *plugin, plugify::PluginUtils::ToString, sMessage);
+						Print<plugify::PluginState>(sMessage, "Plugin", *plugin, plugify::PluginUtils::ToString);
 						auto descriptor = plugin->GetDescriptor();
 						std::format_to(std::back_inserter(sMessage), "  Language module: {}\n", descriptor.GetLanguageModule());
 						sMessage += "  Dependencies: \n";
@@ -352,7 +349,7 @@ namespace plugifyMM
 							auto dependency = pluginManager->FindPlugin(reference.GetName());
 							if (dependency.has_value())
 							{
-								Print<plugify::PluginState>(*dependency, plugify::PluginUtils::ToString, "    ");
+								Print<plugify::PluginState>(sMessage, *dependency, plugify::PluginUtils::ToString, "    ");
 							}
 							else
 							{
@@ -388,7 +385,7 @@ namespace plugifyMM
 					{
 						std::string sMessage;
 
-						Print<plugify::ModuleState>("Module", *module, plugify::ModuleUtils::ToString, sMessage);
+						Print<plugify::ModuleState>(sMessage, "Module", *module, plugify::ModuleUtils::ToString);
 						std::format_to(std::back_inserter(sMessage), "  Language: {}\n", module->GetLanguage());
 						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
 
