@@ -53,7 +53,7 @@ jobs:
             echo>>"%GITHUB_ENV%" %%a=%%b
           )
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
@@ -87,7 +87,7 @@ jobs:
         shell: bash
         run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
@@ -133,12 +133,12 @@ jobs:
       - name: Main build number
         run: echo "BUILD_NUMBER=${{ needs.setup.outputs.buildnumber }}" >> $GITHUB_ENV
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: plugify-build-windows-${{ env.GITHUB_SHA_SHORT }}
           path: build/windows
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: plugify-build-linux-${{ env.GITHUB_SHA_SHORT }}
           path: build/linux
