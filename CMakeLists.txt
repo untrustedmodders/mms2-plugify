@@ -4,6 +4,22 @@ if(POLICY CMP0092)
     cmake_policy(SET CMP0092 NEW) # Don't add -W3 warning level by default.
 endif()
 
+project(cs2-plugify VERSION 1.0.0.0 DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
+
+set(PROJECT_AUTHOR "Untrusted Modders Team")
+set(PROJECT_DESCRIPTION_FULL "Metamod:Source Plugify plugin")
+set(PROJECT_LICENSE "MTL")
+string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
+string(TIMESTAMP PROJECT_BUILD_TIME "%H:%M:%S")
+
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
+if(WIN32 AND NOT MSVC)
+    message(FATAL "MSVC restricted.")
+endif()
+
 set(EXTERNAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 
 function(set_or_external_dir VAR_NAME DEFAULT_DIR)
@@ -19,26 +35,18 @@ endfunction()
 string(TIMESTAMP PROJECT_BUILD_DATE_YEAR "%Y")
 
 set_or_external_dir(LOGGER_DIR "logger")
+set_or_external_dir(METAMOD_DIR "metamod-source")
+set_or_external_dir(SOURCESDK_DIR "sourcesdk")
+
+#set(SOURCESDK_MALLOC_OVERRIDE ON CACHE INTERNAL "")
+set(SOURCESDK_LINK_STRIP_CPP_EXPORTS ON CACHE INTERNAL "")
+set(SOURCESDK_LINK_STEAMWORKS OFF CACHE INTERNAL "")
 
 include(cmake/logger.cmake)
+include(cmake/metamod.cmake)
+include(cmake/sourcesdk.cmake)
 
-project(cs2-plugify VERSION 1.0.0.0 DESCRIPTION "Plugify CS2 Core" HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify" LANGUAGES C CXX ASM)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-endif()
-
-if(WIN32 AND NOT MSVC)
-    message(FATAL "MSVC restricted.")
-endif()
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING
         "Only do Release and Debug"
@@ -54,77 +62,37 @@ if(LINUX)
 endif()
 add_subdirectory(external/plugify)
 
-if(LINUX)
-    #set(SOURCESDK_MALLOC_OVERRIDE ON CACHE INTERNAL "")
-    set(SOURCESDK_LINK_STRIP_CPP_EXPORTS ON CACHE INTERNAL "")
-    set(SOURCESDK_LINK_STEAMWORKS OFF CACHE INTERNAL "")
-endif()
-add_subdirectory(external/sourcesdk)
-
 # Sources
 file(GLOB_RECURSE SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
-set(SOURCESDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/sourcesdk)
-set(METAMOD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/metamod-source)
-
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${LOGGER_INCLUDE_DIRS}
-
-        ${SOURCESDK_DIR}
-        ${SOURCESDK_DIR}/common
-        ${SOURCESDK_DIR}/game/shared
-        ${SOURCESDK_DIR}/game/server
-        ${SOURCESDK_DIR}/public
-        ${SOURCESDK_DIR}/public/engine
-        ${SOURCESDK_DIR}/public/mathlib
-        ${SOURCESDK_DIR}/public/tier0
-        ${SOURCESDK_DIR}/public/tier1
-        ${SOURCESDK_DIR}/public/entity2
-        ${SOURCESDK_DIR}/public/game/server
-        ${SOURCESDK_DIR}/public/entity2
-
-        ${METAMOD_DIR}/core
-        ${METAMOD_DIR}/core/sourcehook
+        ${METAMOD_INCLUDE_DIRS}
+        ${SOURCESDK_INCLUDE_DIRS}
 )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+	C_STANDARD 11
+	C_STANDARD_REQUIRED ON
+	C_EXTENSIONS OFF
+
+	CXX_STANDARD 20
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF
+)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "plugify")
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+        ${METAMOD_COMPILE_DEFINITIONS}
+
         PLUGIFY_PROJECT_YEAR="${PROJECT_BUILD_DATE_YEAR}"
         PLUGIFY_PROJECT_NAME="${PROJECT_NAME}"
         PLUGIFY_PROJECT_DESCRIPTION="${CMAKE_PROJECT_DESCRIPTION}"
         PLUGIFY_PROJECT_HOMEPAGE_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
-        PLUGIFY_PROJECT_VERSION="${PLUGIFY_PROJECT_VERSION}")
-
-if(LINUX)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-            META_IS_SOURCE2
-            _LINUX
-            POSIX
-            LINUX
-            GNUC
-            COMPILER_GCC
-            PLATFORM_64BITS
-            bswap_16=__bswap_16
-            bswap_32=__bswap_32
-            bswap_64=__bswap_64
-            _GLIBCXX_USE_CXX11_ABI=0
-    )
-elseif(WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-            META_IS_SOURCE2
-            COMPILER_MSVC
-            COMPILER_MSVC64
-            _WIN32
-            _WINDOWS
-            _ALLOW_KEYWORD_MACROS
-            __STDC_LIMIT_MACROS
-            _CRT_SECURE_NO_WARNINGS=1
-            _CRT_SECURE_NO_DEPRECATE=1
-            _CRT_NONSTDC_NO_DEPRECATE=1
-    )
-    #set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
+        PLUGIFY_PROJECT_VERSION="${PLUGIFY_PROJECT_VERSION}"
+)
 
 set(PLUGIFY_LINK_LIBRARIES ${LOGGER_BINARY_DIR} plugify::plugify sourcesdk miniz)
 
