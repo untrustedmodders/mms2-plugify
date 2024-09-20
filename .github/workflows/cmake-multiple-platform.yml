@@ -62,7 +62,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
-          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- /m:16
+          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- /m
 
       - name: Clean build directory
         run: |
@@ -104,7 +104,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
-          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j16
+          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j
 
       - name: Clean build directory
         run: |
