@@ -34,8 +34,8 @@ else()
 	list(APPEND PLUGIFY_LINK_LIBRARIES curl)
 endif()
 
+add_subdirectory(${PLUGIFY_DIR} ${PLUGIFY_BINARY_DIR})
+
 if(NOT COMPILER_SUPPORTS_FORMAT)
 	list(APPEND PLUGIFY_LINK_LIBRARIES fmt::fmt-header-only)
 endif()
-
-add_subdirectory(${PLUGIFY_DIR} ${PLUGIFY_BINARY_DIR})
