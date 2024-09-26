@@ -62,7 +62,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
-          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- /m
+          cmake --build . --target mms2-plugify --config ${{ env.BUILD_TYPE }} -- /m
 
       - name: Clean build directory
         run: |
@@ -104,7 +104,7 @@ jobs:
           mkdir -p build
           cd build
           cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DPLUGIFY_PROJECT_VERSION="${{ needs.setup.outputs.buildnumber }}" ..
-          cmake --build . --target cs2-plugify --config ${{ env.BUILD_TYPE }} -- -j
+          cmake --build . --target mms2-plugify --config ${{ env.BUILD_TYPE }} -- -j
 
       - name: Clean build directory
         run: |
@@ -162,4 +162,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@0.3.2
         with:
-          args: "A new release of CS2-Plugify has been tagged (v${{ env.BUILD_NUMBER }}) at ${{ steps.release.outputs.url }}"
+          args: "A new release of mms2-plugify has been tagged (v${{ env.BUILD_NUMBER }}) at ${{ steps.release.outputs.url }}"

@@ -1,4 +1,4 @@
-# cs2-plugify
+# mms2-plugify
 # Copyright (C) 2024 untrustedmodders
 # Licensed under the MIT license. See LICENSE file in the project root for details.
 
@@ -8,10 +8,10 @@ if(POLICY CMP0092)
 	cmake_policy(SET CMP0092 NEW) # Don't add -W3 warning level by default.
 endif()
 
-project(cs2-plugify
+project(mms2-plugify
 	VERSION 1.0.0.0
 	DESCRIPTION "Plugify CS2 Core"
-	HOMEPAGE_URL "https://github.com/untrustedmodders/cs2-plugify"
+	HOMEPAGE_URL "https://github.com/untrustedmodders/mms2-plugify"
 	LANGUAGES C CXX
 )
 

@@ -1,4 +1,4 @@
-# CS2-Plugify: Server Side Modding Framework for Counter-Strike 2
+# mms2-plugify: Server Side Modding Framework for Counter-Strike 2
 
 It is a cutting-edge server-side modding framework designed specifically for Counter-Strike 2 servers. This project takes modding to the next level by implementing a Plugify Plugin & Package Manager on top of a Metamod Source Plugin. This unique approach allows developers to create plugins that seamlessly interact with the game server, using Plugify language modules to enable the creation of maintainable and testable code.
 
@@ -7,7 +7,7 @@ It is a cutting-edge server-side modding framework designed specifically for Cou
 ## Key Features
 
 1. **Seamless Integration:**
-CS2-plugify seamlessly integrates with Counter-Strike 2 servers, providing a robust framework for server-side modding. Harness the power of Plugify's versatility to enhance and extend your server's functionality.
+mms2-plugify seamlessly integrates with Counter-Strike 2 servers, providing a robust framework for server-side modding. Harness the power of Plugify's versatility to enhance and extend your server's functionality.
 
 2. **Multi-Language Support:**
 Develop plugins in your language of choice, whether it's C++, C#, Python, or other supported languages. Plugify introduces language modules, breaking down language barriers and offering flexibility in mod development.
@@ -29,7 +29,7 @@ Leverage Plugify to create maintainable and testable code for your mods. Enjoy t
    - Explore the [Usage Guide](docs/usage.md) for detailed instructions on creating server-side mods, installing language modules, and maximizing the potential of Plugify.
 
 3. **Examples:**
-   - Check out the [Examples](https://github.com/untrustedmodders/cs2-sdk-plugin/examples/) directory for sample mods and use cases to kickstart your modding journey with Plugify.
+   - Check out the [Examples](https://github.com/untrustedmodders/plugify-source-2/examples/) directory for sample mods and use cases to kickstart your modding journey with Plugify.
 
 ## Requirements
 - [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master) - build 1219 or higher
@@ -45,4 +45,4 @@ We welcome contributions! See [CONTRIBUTING.md](https://github.com/untrustedmodd
 
 ## License
 
-CS2-plugify is licensed under the [MIT](LICENSE).
+mms2-plugify is licensed under the [MIT](LICENSE).
