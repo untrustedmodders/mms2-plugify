@@ -7,9 +7,9 @@
         "https://untrustedmodders.github.io/plugify-module-golang/plugify-module-golang.json",
         "https://untrustedmodders.github.io/plugify-module-dotnet/plugify-module-dotnet.json",
         "https://untrustedmodders.github.io/plugify-module-python3.12/plugify-module-python3.12.json",
-        "https://untrustedmodders.github.io/plugify-polyhook/polyhook.json",
-        "https://untrustedmodders.github.io/dynhook/dynhook.json",
-        "https://untrustedmodders.github.io/plugify-dyncall/plugify-dyncall.json",
+        "https://untrustedmodders.github.io/plugify-polyhook/plugify-polyhook.json",
+        "https://untrustedmodders.github.io/plugify-dynhook/plugify-dynhook.json",
+        "https://untrustedmodders.github.io/plugify-plugify-dyncall/plugify-plugify-dyncall.json",
         "https://untrustedmodders.github.io/plugify-source-2/cs2sdk.json"
     ],
     "preferOwnSymbols": ${PLUGIFY_PREFER_OWN_SYMBOLS}
