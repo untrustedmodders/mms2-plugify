@@ -22,7 +22,7 @@ Leverage Plugify to create maintainable and testable code for your mods. Enjoy t
 ## Getting Started
 
 1. **Installation:**
-   - Download the latest build from [here](releases).
+   - Download the latest build from [here](https://github.com/untrustedmodders/plugify-source-2/releases/).
    - Detailed installation instructions can be found in the [Installation Guide](docs/installation.md).
 
 2. **Usage:**
