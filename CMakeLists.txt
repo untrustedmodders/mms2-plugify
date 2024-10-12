@@ -44,13 +44,11 @@ function(set_or_external_dir VAR_NAME TARGET)
 	set(${VAR_NAME} "${${VAR_NAME}}" PARENT_SCOPE)
 endfunction()
 
-set_or_external_dir(LOGGER_DIR "logger")
 set_or_external_dir(METAMOD_DIR "metamod-source")
 set_or_external_dir(PLUGIFY_DIR "plugify")
 set_or_external_dir(SOURCESDK_DIR "sourcesdk")
 
 include(cmake/platform/shared.cmake)
-include(cmake/logger.cmake)
 include(cmake/metamod.cmake)
 include(cmake/plugify.cmake)
 include(cmake/sourcesdk.cmake)
@@ -87,10 +85,10 @@ if(UNIX)
 	endif()
 endif()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE ${COMPILE_DEFINITIONS} ${LOGGER_COMPILE_DEFINITIONS} ${METAMOD_COMPILE_DEFINITIONS} ${PLUGIFY_COMPILE_DEFINITIONS})
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS} ${LOGGER_INCLUDE_DIRS} ${METAMOD_INCLUDE_DIRS} ${PLUGIFY_INCLUDE_DIRS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${METAMOD_COMPILE_DEFINITIONS} ${PLUGIFY_COMPILE_DEFINITIONS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${METAMOD_INCLUDE_DIRS} ${PLUGIFY_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LOGGER_BINARY_DIR} ${PLUGIFY_BINARY_DIR} ${PLUGIFY_LINK_LIBRARIES} ${SOURCESDK_BINARY_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_BINARY_DIR} ${PLUGIFY_LINK_LIBRARIES} ${SOURCESDK_BINARY_DIR})
 
 configure_file(
 	${CMAKE_SOURCE_DIR}/plugify.pconfig.in

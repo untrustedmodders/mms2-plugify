@@ -7,7 +7,4 @@
 [submodule "external/sourcesdk"]
 	path = external/sourcesdk
 	url = https://github.com/Wend4r/sourcesdk/
-	branch = cs2
-[submodule "external/logger"]
-	path = external/logger
-	url = https://github.com/untrustedmodders/s2u-logger.git
+	branch = main

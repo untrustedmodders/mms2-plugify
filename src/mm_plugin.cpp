@@ -56,8 +56,8 @@ namespace plugifyMM
 	PlugifyMMPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
 
-	#define CONPRINT(x) g_Plugin.m_logger->Message(x)
-	#define CONPRINTE(x) g_Plugin.m_logger->Warning(x)
+	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
+	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
 
 	template <typename S, typename T, typename F> requires (std::is_function_v<F>)
 	void Print(std::string& out, const T &t, F &f, std::string_view tab = "  ")
