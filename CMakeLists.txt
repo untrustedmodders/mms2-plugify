@@ -90,6 +90,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${METAMOD_INCLUDE_DIRS} ${PLU
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIFY_BINARY_DIR} ${PLUGIFY_LINK_LIBRARIES} ${SOURCESDK_BINARY_DIR})
 
+if(LINUX)
+    set(PLUGIFY_PREFER_OWN_SYMBOLS "true")
+else()
+    set(PLUGIFY_PREFER_OWN_SYMBOLS "false")
+endif()
+
 configure_file(
 	${CMAKE_SOURCE_DIR}/plugify.pconfig.in
 	${CMAKE_BINARY_DIR}/plugify.pconfig
