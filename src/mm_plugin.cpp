@@ -12,21 +12,21 @@
  * This sample plugin is public domain.
  */
 
-#include "mm_plugin.h"
+#include "mm_plugin.hpp"
 
 #include <igameevents.h>
 #include <iserver.h>
 
-#include <plugify/compat_format.h>
-#include <plugify/plugify.h>
-#include <plugify/plugin.h>
-#include <plugify/module.h>
-#include <plugify/plugin_descriptor.h>
-#include <plugify/plugin_reference_descriptor.h>
-#include <plugify/language_module_descriptor.h>
-#include <plugify/package.h>
-#include <plugify/plugin_manager.h>
-#include <plugify/package_manager.h>
+#include <plugify/compat_format.hpp>
+#include <plugify/plugify.hpp>
+#include <plugify/plugin.hpp>
+#include <plugify/module.hpp>
+#include <plugify/plugin_descriptor.hpp>
+#include <plugify/plugin_reference_descriptor.hpp>
+#include <plugify/language_module_descriptor.hpp>
+#include <plugify/package.hpp>
+#include <plugify/plugin_manager.hpp>
+#include <plugify/package_manager.hpp>
 
 #include <filesystem>
 #include <chrono>

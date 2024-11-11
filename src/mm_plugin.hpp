@@ -16,7 +16,7 @@
 
 #include <ISmmPlugin.h>
 
-#include "mm_logger.h"
+#include "mm_logger.hpp"
 
 namespace plugify
 {

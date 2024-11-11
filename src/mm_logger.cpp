@@ -1,5 +1,5 @@
-#include "mm_logger.h"
-#include "mm_plugin.h"
+#include "mm_logger.hpp"
+#include "mm_plugin.hpp"
 
 using namespace plugifyMM;
 

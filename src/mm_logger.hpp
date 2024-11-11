@@ -5,8 +5,8 @@
 #include <tier0/dbg.h>
 #include <tier0/logging.h>
 
-#include <plugify/log.h>
-#include <plugify/compat_format.h>
+#include <plugify/log.hpp>
+#include <plugify/compat_format.hpp>
 
 namespace plugifyMM
 {
