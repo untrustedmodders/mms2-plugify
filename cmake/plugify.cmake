@@ -10,7 +10,7 @@ set(PLUGIFY_BINARY_DIR "plugify")
 
 # We target plugify as object to have exported methods of plugify
 set(PLUGIFY_BUILD_OBJECT_LIB ON CACHE INTERNAL "")
-
+set(PLUGIFY_BUILD_TESTS OFF CACHE INTERNAL "")
 if(LINUX)
 	set(PLUGIFY_USE_STATIC_STDLIB ON CACHE INTERNAL "")
 endif()
