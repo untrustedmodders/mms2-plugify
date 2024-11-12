@@ -10,7 +10,7 @@ endif()
 
 project(mms2-plugify
 	VERSION 1.0.0.0
-	DESCRIPTION "Plugify CS2 Core"
+	DESCRIPTION "Plugify MMS2 Core"
 	HOMEPAGE_URL "https://github.com/untrustedmodders/mms2-plugify"
 	LANGUAGES C CXX
 )
@@ -100,6 +100,16 @@ configure_file(
 	${CMAKE_SOURCE_DIR}/plugify.pconfig.in
 	${CMAKE_BINARY_DIR}/plugify.pconfig
 )
+
+if(WINDOWS)
+	set(PLUGIFY_VDF_PLATFORM "win64")
+elseif(LINUX)
+	set(PLUGIFY_VDF_PLATFORM "linuxsteamrt64")
+elseif(APPLE)
+	set(PLUGIFY_VDF_PLATFORM "osx64")
+else()
+	message(FATAL_ERROR "Unsupported platform")
+endif()
 
 configure_file(
 	${CMAKE_SOURCE_DIR}/plugify.vdf.in
