@@ -34,7 +34,7 @@ jobs:
 
   build_windows:
     needs: setup
-    runs-on: windows-latest
+    runs-on: windows-2019 # windows-latest
     steps:
       - name: Prepare env
         shell: bash
