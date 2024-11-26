@@ -34,7 +34,7 @@ jobs:
 
   build_windows:
     needs: setup
-    runs-on: windows-2019 # windows-latest
+    runs-on: windows-latest
     steps:
       - name: Prepare env
         shell: bash
@@ -52,7 +52,11 @@ jobs:
           for /f "delims== tokens=1,2" %%a in ('set') do (
             echo>>"%GITHUB_ENV%" %%a=%%b
           )
-
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-version: 17.9.5
+    
       - uses: actions/checkout@v4
         with:
           submodules: "recursive"
