@@ -49,7 +49,7 @@ jobs:
         shell: cmd
         run: |
           :: See https://github.com/microsoft/vswhere/wiki/Find-VC
-          for /f "usebackq delims=*" %%i in (`vswhere -version [16.0,17.9) -property installationPath`) do (
+          for /f "usebackq delims=*" %%i in (`vswhere -version 17.9.5 -property installationPath`) do (
             call "%%i"\Common7\Tools\vsdevcmd.bat -arch=x64 -host_arch=x64
           )
 
