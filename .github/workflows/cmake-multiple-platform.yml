@@ -40,11 +40,16 @@ jobs:
         shell: bash
         run: echo "GITHUB_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          vs-version: 17.9.5
+
       - name: Visual Studio environment
         shell: cmd
         run: |
           :: See https://github.com/microsoft/vswhere/wiki/Find-VC
-          for /f "usebackq delims=*" %%i in (`vswhere -latest -property installationPath`) do (
+          for /f "usebackq delims=*" %%i in (`vswhere -version [16.0,17.9) -property installationPath`) do (
             call "%%i"\Common7\Tools\vsdevcmd.bat -arch=x64 -host_arch=x64
           )
 
@@ -52,11 +57,7 @@ jobs:
           for /f "delims== tokens=1,2" %%a in ('set') do (
             echo>>"%GITHUB_ENV%" %%a=%%b
           )
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-        with:
-          vs-version: 17.9.5
-    
+
       - uses: actions/checkout@v4
         with:
           submodules: "recursive"
