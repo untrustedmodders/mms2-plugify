@@ -33,7 +33,7 @@
 #include <type_traits>
 
 CBaseGameSystemFactory **CBaseGameSystemFactory::sm_pFirst = nullptr;
-CGameSystemEventDispatcher*  sm_pEventDispatcher = nullptr;
+//CGameSystemEventDispatcher*  sm_pEventDispatcher = nullptr;
 
 namespace mm
 {
