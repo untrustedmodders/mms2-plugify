@@ -8,12 +8,12 @@
 #include <plugify/log.hpp>
 #include <plugify/compat_format.hpp>
 
-namespace plugifyMM
+namespace mm
 {
 	class MMLogger final : public plugify::ILogger
 	{
 	public:
-		MMLogger(const char *name, RegisterTagsFunc registerTagsFunc, int flags = 0, LoggingVerbosity_t verbosity = LV_DEFAULT, const Color &defaultColor = UNSPECIFIED_LOGGING_COLOR);
+		MMLogger(const char *name, int flags = 0, LoggingVerbosity_t verbosity = LV_DEFAULT, const Color &defaultColor = UNSPECIFIED_LOGGING_COLOR);
 		~MMLogger() override = default;
 
 		bool IsChannelEnabled(LoggingSeverity_t severity) const;

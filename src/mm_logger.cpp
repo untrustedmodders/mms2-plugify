@@ -1,11 +1,11 @@
 #include "mm_logger.hpp"
 #include "mm_plugin.hpp"
 
-using namespace plugifyMM;
+using namespace mm;
 
-MMLogger::MMLogger(const char *name, RegisterTagsFunc registerTagsFunc, int flags, LoggingVerbosity_t verbosity, const Color &defaultColor)
+MMLogger::MMLogger(const char *name, int flags, LoggingVerbosity_t verbosity, const Color &defaultColor)
 {
-	m_channelID = LoggingSystem_RegisterLoggingChannel(name, registerTagsFunc, flags, verbosity, defaultColor);
+	m_channelID = LoggingSystem_RegisterLoggingChannel(name, nullptr, flags, verbosity, defaultColor);
 }
 
 bool MMLogger::IsChannelEnabled(LoggingSeverity_t severity) const

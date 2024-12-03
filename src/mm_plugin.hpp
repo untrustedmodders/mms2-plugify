@@ -16,6 +16,7 @@
 
 #include <ISmmPlugin.h>
 
+#include "igamesystemfactory.h"
 #include "mm_logger.hpp"
 
 namespace plugify
@@ -23,18 +24,24 @@ namespace plugify
 	class IPlugify;
 }
 
-namespace plugifyMM
+namespace mm
 {
-	class PlugifyMMPlugin : public ISmmPlugin
+	enum class PlugifyState
 	{
-	public:
+		Wait,
+		Load,
+		Unload
+	};
+
+	class PlugifyPlugin : public ISmmPlugin, public CBaseGameSystem
+	{
+	public: // ISmmPlugin
 		bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late) override;
 		bool Unload(char *error, size_t maxlen) override;
 		bool Pause(char *error, size_t maxlen) override;
 		bool Unpause(char *error, size_t maxlen) override;
 		void AllPluginsLoaded() override;
 
-	public:
 		const char *GetAuthor() override;
 		const char *GetName() override;
 		const char *GetDescription() override;
@@ -44,12 +51,19 @@ namespace plugifyMM
 		const char *GetDate() override;
 		const char *GetLogTag() override;
 
+	public: // CBaseGameSystem
+		GS_EVENT(ServerGamePostSimulate);
+
+	public: // Fields
 		IMetamodListener m_listener;
 		std::shared_ptr<MMLogger> m_logger;
 		std::shared_ptr<plugify::IPlugify> m_context;
+		PlugifyState m_state{};
+
+		static IGameSystemFactory *sm_Factory;
 	};
 
-	extern PlugifyMMPlugin g_Plugin;
+	extern PlugifyPlugin g_Plugin;
 
 	PLUGIN_GLOBALVARS();
 } // namespace plugifyMM

@@ -32,29 +32,15 @@
 #include <chrono>
 #include <type_traits>
 
-std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
-{
-	auto now = std::chrono::system_clock::now();
-	auto timeT = std::chrono::system_clock::to_time_t(now);
-	std::stringstream ss;
-	ss << std::put_time(std::localtime(&timeT), format.data());
-	return ss.str();
-}
+CBaseGameSystemFactory **CBaseGameSystemFactory::sm_pFirst = nullptr;
+CGameSystemEventDispatcher*  sm_pEventDispatcher = nullptr;
 
-void RegisterTags(LoggingChannelID_t channelID)
+namespace mm
 {
-}
+	IGameSystemFactory *PlugifyPlugin::sm_Factory = nullptr;
 
-namespace plugifyMM
-{
-	IServerGameDLL *server = NULL;
-	IServerGameClients *gameclients = NULL;
-	IVEngineServer *engine = NULL;
-	IGameEventManager2 *gameevents = NULL;
-	ICvar *icvar = NULL;
-
-	PlugifyMMPlugin g_Plugin;
-	PLUGIN_EXPOSE(PlugifyMMPlugin, g_Plugin);
+	PlugifyPlugin g_Plugin;
+	PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
 
 	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
 	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
@@ -144,6 +130,15 @@ namespace plugifyMM
 		{
 			std::format_to(std::back_inserter(out), "  Update: {}\n", updateURL);
 		}
+	}
+
+	std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S")
+	{
+		auto now = std::chrono::system_clock::now();
+		auto timeT = std::chrono::system_clock::to_time_t(now);
+		std::stringstream ss;
+		ss << std::put_time(std::localtime(&timeT), format.data());
+		return ss.str();
 	}
 
 	ptrdiff_t FormatInt(const std::string &str)
@@ -273,8 +268,7 @@ namespace plugifyMM
 				}
 				else
 				{
-					pluginManager->Initialize();
-					CONPRINT("Plugin manager was loaded.\n");
+					g_Plugin.m_state = PlugifyState::Load;
 				}
 			}
 
@@ -286,8 +280,7 @@ namespace plugifyMM
 				}
 				else
 				{
-					pluginManager->Terminate();
-					CONPRINT("Plugin manager was unloaded.\n");
+					g_Plugin.m_state = PlugifyState::Unload;
 				}
 			}
 
@@ -681,25 +674,24 @@ namespace plugifyMM
 			         "Try plugify help or -h for more information.\n");
 		}
 	}
+	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
 
-	bool PlugifyMMPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+	bool PlugifyPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 	{
 		PLUGIN_SAVEVARS();
 
-		GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer, INTERFACEVERSION_VENGINESERVER);
-		GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
-		GET_V_IFACE_ANY(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
-		GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS);
-		GET_V_IFACE_ANY(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+		GET_V_IFACE_CURRENT(GetEngineFactory, g_pEngineServer, IVEngineServer2, SOURCE2ENGINETOSERVER_INTERFACE_VERSION);
+		GET_V_IFACE_CURRENT(GetEngineFactory, g_pCVar, ICvar, CVAR_INTERFACE_VERSION);
+		GET_V_IFACE_CURRENT(GetServerFactory, g_pSource2Server, ISource2Server, SOURCE2SERVER_INTERFACE_VERSION);
+		GET_V_IFACE_CURRENT(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
 
 		g_SMAPI->AddListener(this, &m_listener);
 
-		g_pCVar = icvar;
 		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
 
 		m_context = plugify::MakePlugify();
 
-		m_logger = std::make_shared<MMLogger>("plugify", &RegisterTags);
+		m_logger = std::make_shared<MMLogger>("plugify");
 		m_logger->SetSeverity(plugify::Severity::Info);
 		m_context->SetLogger(m_logger);
 
@@ -734,88 +726,142 @@ namespace plugifyMM
 		return result;
 	}
 
-	bool PlugifyMMPlugin::Unload(char *error, size_t maxlen)
+	bool PlugifyPlugin::Unload(char *error, size_t maxlen)
 	{
 		m_context.reset();
+		if (sm_Factory)
+		{
+			sm_Factory->Shutdown();
+			sm_Factory->DestroyGameSystem(this);
+			delete sm_Factory;
+			//delete dynamic_cast<CBaseGameSystemFactory*>(sm_Factory);
+			sm_Factory =  nullptr;
+		}
 		return true;
 	}
 
-	void PlugifyMMPlugin::AllPluginsLoaded()
+	GS_EVENT_MEMBER(PlugifyPlugin, ServerGamePostSimulate)
+	{
+		switch (m_state)
+		{
+			case PlugifyState::Load:
+			{
+				auto pluginManager = m_context->GetPluginManager().lock();
+				if (!pluginManager)
+				{
+					m_state = PlugifyState::Wait;
+					return;
+				}
+
+				pluginManager->Initialize();
+				CONPRINT("Plugin manager was loaded.\n");
+				break;
+			}
+			case PlugifyState::Unload:
+			{
+				auto pluginManager = m_context->GetPluginManager().lock();
+				if (!pluginManager)
+				{
+					m_state = PlugifyState::Wait;
+					return;
+				}
+
+				pluginManager->Terminate();
+				CONPRINT("Plugin manager was unloaded.\n");
+				break;
+			}
+			case PlugifyState::Wait:
+				return;
+		}
+
+		m_state = PlugifyState::Wait;
+	}
+
+	void PlugifyPlugin::AllPluginsLoaded()
 	{
 	}
 
-	bool PlugifyMMPlugin::Pause(char *error, size_t maxlen)
+	bool PlugifyPlugin::Pause(char *error, size_t maxlen)
 	{
 		return true;
 	}
 
-	bool PlugifyMMPlugin::Unpause(char *error, size_t maxlen)
+	bool PlugifyPlugin::Unpause(char *error, size_t maxlen)
 	{
 		return true;
 	}
 
-	const char *PlugifyMMPlugin::GetLicense()
+	const char *PlugifyPlugin::GetLicense()
 	{
-		return "Public Domain";
+		return "MIT";
 	}
 
-	const char *PlugifyMMPlugin::GetVersion()
+	const char *PlugifyPlugin::GetVersion()
 	{
 		return PLUGIFY_PROJECT_VERSION;
 	}
 
-	const char *PlugifyMMPlugin::GetDate()
+	const char *PlugifyPlugin::GetDate()
 	{
 		return __DATE__;
 	}
 
-	const char *PlugifyMMPlugin::GetLogTag()
+	const char *PlugifyPlugin::GetLogTag()
 	{
 		return "PLUGIFY";
 	}
 
-	const char *PlugifyMMPlugin::GetAuthor()
+	const char *PlugifyPlugin::GetAuthor()
 	{
 		return "untrustedmodders";
 	}
 
-	const char *PlugifyMMPlugin::GetDescription()
+	const char *PlugifyPlugin::GetDescription()
 	{
 		return PLUGIFY_PROJECT_DESCRIPTION;
 	}
 
-	const char *PlugifyMMPlugin::GetName()
+	const char *PlugifyPlugin::GetName()
 	{
 		return PLUGIFY_PROJECT_NAME;
 	}
 
-	const char *PlugifyMMPlugin::GetURL()
+	const char *PlugifyPlugin::GetURL()
 	{
 		return PLUGIFY_PROJECT_HOMEPAGE_URL;
 	}
-} // namespace plugifyMM
+} // namespace mm
 
 SMM_API IMetamodListener *Plugify_ImmListener()
 {
-	return &plugifyMM::g_Plugin.m_listener;
+	return &mm::g_Plugin.m_listener;
 }
 
 SMM_API ISmmAPI *Plugify_ISmmAPI()
 {
-	return plugifyMM::g_SMAPI;
+	return mm::g_SMAPI;
 }
 
 SMM_API ISmmPlugin *Plugify_ISmmPlugin()
 {
-	return plugifyMM::g_PLAPI;
+	return mm::g_PLAPI;
 }
 
 SMM_API PluginId Plugify_Id()
 {
-	return plugifyMM::g_PLID;
+	return mm::g_PLID;
 }
 
 SMM_API SourceHook::ISourceHook *Plugify_SourceHook()
 {
-	return plugifyMM::g_SHPtr;
+	return mm::g_SHPtr;
+}
+
+SMM_API void Plugify_RegisterFirstGameSystem(CBaseGameSystemFactory **ppFirstGameSystem)
+{
+	CBaseGameSystemFactory::sm_pFirst = ppFirstGameSystem;
+	if (mm::PlugifyPlugin::sm_Factory == nullptr)
+	{
+		mm::PlugifyPlugin::sm_Factory = new CGameSystemStaticFactory<mm::PlugifyPlugin>("PlugifyGameSystem", &mm::g_Plugin);
+	}
 }
