@@ -59,8 +59,6 @@ namespace mm
 		std::shared_ptr<MMLogger> m_logger;
 		std::shared_ptr<plugify::IPlugify> m_context;
 		PlugifyState m_state{};
-
-		static IGameSystemFactory *sm_Factory;
 	};
 
 	extern PlugifyPlugin g_Plugin;

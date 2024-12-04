@@ -33,12 +33,11 @@
 #include <type_traits>
 
 CBaseGameSystemFactory **CBaseGameSystemFactory::sm_pFirst = nullptr;
-//CGameSystemEventDispatcher*  sm_pEventDispatcher = nullptr;
+CBaseGameSystemFactory *sm_Factory = nullptr;
+CGameSystemEventDispatcher **g_ppEventDispatcher = nullptr;
 
 namespace mm
 {
-	IGameSystemFactory *PlugifyPlugin::sm_Factory = nullptr;
-
 	PlugifyPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
 
@@ -732,10 +731,30 @@ namespace mm
 		if (sm_Factory)
 		{
 			sm_Factory->Shutdown();
+			{
+				const auto *pGameSystem = sm_Factory->GetStaticGameSystem();
+				auto **ppDispatcher = g_ppEventDispatcher;
+				Assert(ppDispatcher);
+				auto *pDispatcher = *ppDispatcher;
+				if (pDispatcher)
+				{
+					auto *funcListeners = pDispatcher->m_funcListeners;
+					Assert(funcListeners);
+					for (auto &vecListeners : *funcListeners)
+					{
+						FOR_EACH_VEC(vecListeners, i)
+						{
+							if (vecListeners[i] == pGameSystem)
+							{
+								vecListeners.FastRemove(i);
+							}
+						}
+					}
+				}
+			}
 			sm_Factory->DestroyGameSystem(this);
-			delete sm_Factory;
-			//delete dynamic_cast<CBaseGameSystemFactory*>(sm_Factory);
-			sm_Factory =  nullptr;
+			sm_Factory->Destroy();
+			sm_Factory = nullptr;
 		}
 		return true;
 	}
@@ -857,11 +876,12 @@ SMM_API SourceHook::ISourceHook *Plugify_SourceHook()
 	return mm::g_SHPtr;
 }
 
-SMM_API void Plugify_RegisterFirstGameSystem(CBaseGameSystemFactory **ppFirstGameSystem)
+SMM_API void Plugify_RegisterGameSystem(CBaseGameSystemFactory **ppFirstGameSystem, CGameSystemEventDispatcher** ppEventDispatcher)
 {
 	CBaseGameSystemFactory::sm_pFirst = ppFirstGameSystem;
-	if (mm::PlugifyPlugin::sm_Factory == nullptr)
+	g_ppEventDispatcher = ppEventDispatcher;
+	if (sm_Factory == nullptr)
 	{
-		mm::PlugifyPlugin::sm_Factory = new CGameSystemStaticFactory<mm::PlugifyPlugin>("PlugifyGameSystem", &mm::g_Plugin);
+		sm_Factory = new CGameSystemStaticFactory<mm::PlugifyPlugin>("PlugifyGameSystem", &mm::g_Plugin);
 	}
 }
