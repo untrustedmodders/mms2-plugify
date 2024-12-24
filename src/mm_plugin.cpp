@@ -154,15 +154,15 @@ namespace mm
 		}
 		catch (const std::invalid_argument &e)
 		{
-			CONPRINT(std::format("Invalid argument: {}\n", e.what()).c_str());
+			CONPRINTE(std::format("Invalid argument: {}\n", e.what()).c_str());
 		}
 		catch (const std::out_of_range &e)
 		{
-			CONPRINT(std::format("Out of range: {}\n", e.what()).c_str());
+			CONPRINTE(std::format("Out of range: {}\n", e.what()).c_str());
 		}
 		catch (const std::exception &e)
 		{
-			CONPRINT(std::format("Conversion error: {}\n", e.what()).c_str());
+			CONPRINTE(std::format("Conversion error: {}\n", e.what()).c_str());
 		}
 
 		return ptrdiff_t(-1);
@@ -203,7 +203,7 @@ namespace mm
 				CONPRINT("Plugify Menu\n"
 				         "(c) untrustedmodders\n"
 				         "https://github.com/untrustedmodders\n"
-				         "usage: plugify <command> [options] [arguments]\n"
+				         "usage: plg <command> [options] [arguments]\n"
 				         "  help           - Show help\n"
 				         "  version        - Version information\n"
 				         "Plugin Manager commands:\n"
@@ -252,18 +252,18 @@ namespace mm
 				{
 					if (packageManager->HasMissedPackages())
 					{
-						CONPRINT("Plugin manager has missing packages, run 'install --missing' to resolve issues.\n");
+						CONPRINTE("Plugin manager has missing packages, run 'install --missing' to resolve issues.\n");
 						return;
 					}
 					if (packageManager->HasConflictedPackages())
 					{
-						CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.\n");
+						CONPRINTE("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.\n");
 						return;
 					}
 				}
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("Plugin manager already loaded.\n");
+					CONPRINTE("Plugin manager already loaded.\n");
 				}
 				else
 				{
@@ -275,7 +275,7 @@ namespace mm
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("Plugin manager already unloaded.\n");
+					CONPRINTE("Plugin manager already unloaded.\n");
 				}
 				else
 				{
@@ -287,7 +287,7 @@ namespace mm
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("You must load plugin manager before query any information from it.\n");
+					CONPRINTE("You must load plugin manager before query any information from it.\n");
 					return;
 				}
 
@@ -306,7 +306,7 @@ namespace mm
 			{
 				if (!pluginManager->IsInitialized())
 				{
-					CONPRINT("You must load plugin manager before query any information from it.\n");
+					CONPRINTE("You must load plugin manager before query any information from it.\n");
 					return;
 				}
 				auto count = pluginManager->GetModules().size();
@@ -325,7 +325,7 @@ namespace mm
 				{
 					if (!pluginManager->IsInitialized())
 					{
-						CONPRINT("You must load plugin manager before query any information from it.\n");
+						CONPRINTE("You must load plugin manager before query any information from it.\n");
 						return;
 					}
 					auto plugin = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
@@ -354,12 +354,12 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT(std::format("Plugin {} not found.\n", arguments[2]).c_str());
+						CONPRINTE(std::format("Plugin {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
 				{
-					CONPRINT("You must provide name.\n");
+					CONPRINTE("You must provide name.\n");
 				}
 			}
 
@@ -369,7 +369,7 @@ namespace mm
 				{
 					if (!pluginManager->IsInitialized())
 					{
-						CONPRINT("You must load plugin manager before query any information from it.");
+						CONPRINTE("You must load plugin manager before query any information from it.");
 						return;
 					}
 					auto module = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
@@ -385,12 +385,12 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT(std::format("Module {} not found.\n", arguments[2]).c_str());
+						CONPRINTE(std::format("Module {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
 				{
-					CONPRINT("You must provide name.\n");
+					CONPRINTE("You must provide name.\n");
 				}
 			}
 
@@ -398,7 +398,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				packageManager->SnapshotPackages(plugify->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
@@ -408,7 +408,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 
@@ -426,7 +426,7 @@ namespace mm
 				}
 				else
 				{
-					CONPRINT("You must give at least one repository to add.\n");
+					CONPRINTE("You must give at least one repository to add.\n");
 				}
 			}
 
@@ -434,7 +434,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				if (options.contains("--missing") || options.contains("-m"))
@@ -467,7 +467,7 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT("You must give at least one requirement to install.\n");
+						CONPRINTE("You must give at least one requirement to install.\n");
 					}
 				}
 			}
@@ -476,7 +476,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				if (options.contains("--all") || options.contains("-a"))
@@ -502,7 +502,7 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT("You must give at least one requirement to remove.\n");
+						CONPRINTE("You must give at least one requirement to remove.\n");
 					}
 				}
 			}
@@ -511,7 +511,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				if (options.contains("--all") || options.contains("-a"))
@@ -526,7 +526,7 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT("You must give at least one requirement to update.\n");
+						CONPRINTE("You must give at least one requirement to update.\n");
 					}
 				}
 			}
@@ -535,13 +535,13 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				auto count = packageManager->GetLocalPackages().size();
 				if (!count)
 				{
-					CONPRINT("No local packages found.\n");
+					CONPRINTE("No local packages found.\n");
 				}
 				else
 				{
@@ -557,7 +557,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				auto count = packageManager->GetRemotePackages().size();
@@ -581,7 +581,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				if (arguments.size() > 2)
@@ -596,12 +596,12 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT(std::format("Package {} not found.\n", arguments[2]).c_str());
+						CONPRINTE(std::format("Package {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
 				{
-					CONPRINT("You must provide name.\n");
+					CONPRINTE("You must provide name.\n");
 				}
 			}
 
@@ -609,7 +609,7 @@ namespace mm
 			{
 				if (pluginManager->IsInitialized())
 				{
-					CONPRINT("You must unload plugin manager before bring any change with package manager.\n");
+					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
 				if (arguments.size() > 2)
@@ -649,12 +649,12 @@ namespace mm
 					}
 					else
 					{
-						CONPRINT(std::format("Package {} not found.\n", arguments[2]).c_str());
+						CONPRINTE(std::format("Package {} not found.\n", arguments[2]).c_str());
 					}
 				}
 				else
 				{
-					CONPRINT("You must provide name.\n");
+					CONPRINTE("You must provide name.\n");
 				}
 			}
 
@@ -664,13 +664,13 @@ namespace mm
 				sMessage += "usage: plugify <command> [options] [arguments]\n"
 				           "Try plugify help or -h for more information.\n";
 
-				CONPRINT(sMessage.c_str());
+				CONPRINTE(sMessage.c_str());
 			}
 		}
 		else
 		{
-			CONPRINT("usage: plugify <command> [options] [arguments]\n"
-			         "Try plugify help or -h for more information.\n");
+			CONPRINTE("usage: plg <command> [options] [arguments]\n"
+			          "Try plg help or -h for more information.\n");
 		}
 	}
 	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
@@ -706,12 +706,12 @@ namespace mm
 
 				if (packageManager->HasMissedPackages())
 				{
-					CONPRINT("Plugin manager has missing packages, run 'update --missing' to resolve issues.");
+					CONPRINTE("Plugin manager has missing packages, run 'update --missing' to resolve issues.");
 					return true;
 				}
 				if (packageManager->HasConflictedPackages())
 				{
-					CONPRINT("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.");
+					CONPRINTE("Plugin manager has conflicted packages, run 'remove --conflict' to resolve issues.");
 					return true;
 				}
 			}
