@@ -66,10 +66,6 @@ namespace mm
 	PlugifyPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
 
-	MemAddr CLightQueryGameSystem;
-	int ServerGamePostSimulateOffset;
-	int SetupHookLoopOffset;
-
 	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, Color(255, 255, 0, 255), x)
 	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, Color(255, 0, 0, 255), x)
 
@@ -749,7 +745,7 @@ namespace mm
 	}
 
 	using SetupHookLoopFn = IHookContext* (*)(CSourceHookImpl *sh, CHookManager *hi, void *vfnptr, void *thisptr, void **origCallAddr, META_RES *statusPtr, META_RES *prevResPtr, META_RES *curResPtr, const void *origRetPtr, void *overrideRetPtr);
-	SetupHookLoopFn _SetupHookLoop;
+	[[maybe_unused]] SetupHookLoopFn _SetupHookLoop;
 	IHookContext* SetupHookLoop(CSourceHookImpl *sh, CHookManager *hi, void *vfnptr, void *thisptr, void **origCallAddr, META_RES *statusPtr, META_RES *prevResPtr, META_RES *curResPtr, const void *origRetPtr, void *overrideRetPtr)
 	{
 		HookContextStack& contextStack = sh->*get(CSourceHookFriend());
@@ -773,6 +769,7 @@ namespace mm
 						break;
 				}
 
+				// Workaround for overhooking
 				if (FindOriginalAddr == nullptr)
 				{
 					Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
@@ -917,15 +914,15 @@ namespace mm
 		path += PLUGIFY_GAME_BINARY PLUGIFY_LIBRARY_PREFIX "server" PLUGIFY_LIBRARY_SUFFIX;
 		Assembly server(path, {}, {}, true);
 		if (server) {
-			CLightQueryGameSystem = server.GetVirtualTableByName("CLightQueryGameSystem");
-			ServerGamePostSimulateOffset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
-			_ServerGamePostSimulate = HookMethod(&CLightQueryGameSystem, &ServerGamePostSimulate, ServerGamePostSimulateOffset);
+			auto table = server.GetVirtualTableByName("CLightQueryGameSystem");
+			int offset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
+			_ServerGamePostSimulate = HookMethod(&table, &ServerGamePostSimulate, offset);
 		}
 
 		if (g_SHPtr != nullptr)
 		{
-			SetupHookLoopOffset = GetVirtualTableIndex(&SourceHook::Impl::CSourceHookImpl::SetupHookLoop);
-			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, SetupHookLoopOffset);
+			int offset = GetVirtualTableIndex(&SourceHook::Impl::CSourceHookImpl::SetupHookLoop);
+			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, offset);
 		}
 
 		m_context = MakePlugify();
@@ -967,18 +964,8 @@ namespace mm
 
 	bool PlugifyPlugin::Unload(char *error, size_t maxlen)
 	{
-		if (_ServerGamePostSimulate)
-		{
-			HookMethod(&CLightQueryGameSystem, _ServerGamePostSimulate, ServerGamePostSimulateOffset);
-			_ServerGamePostSimulate = nullptr;
-		}
-		if (_SetupHookLoop)
-		{
-			HookMethod(g_SHPtr, _SetupHookLoop, SetupHookLoopOffset);
-			_SetupHookLoop = nullptr;
-		}
-		m_context.reset();
-		return true;
+		std::memcpy(error, "Plugify cannot be unload due to sourcehook modifications!", maxlen);
+		return false;
 	}
 
 	void PlugifyPlugin::AllPluginsLoaded()
