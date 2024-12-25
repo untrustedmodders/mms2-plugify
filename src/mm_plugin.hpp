@@ -16,7 +16,6 @@
 
 #include <ISmmPlugin.h>
 
-#include "igamesystemfactory.h"
 #include "mm_logger.hpp"
 
 namespace plugify
@@ -33,7 +32,7 @@ namespace mm
 		Unload
 	};
 
-	class PlugifyPlugin : public ISmmPlugin, public CBaseGameSystem
+	class PlugifyPlugin : public ISmmPlugin
 	{
 	public: // ISmmPlugin
 		bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late) override;
@@ -50,9 +49,6 @@ namespace mm
 		const char *GetVersion() override;
 		const char *GetDate() override;
 		const char *GetLogTag() override;
-
-	public: // CBaseGameSystem
-		GS_EVENT(ServerGamePostSimulate);
 
 	public: // Fields
 		IMetamodListener m_listener;

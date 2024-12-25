@@ -15,9 +15,15 @@
 #include "mm_plugin.hpp"
 
 #include <igameevents.h>
+#include <igamesystem.h>
 #include <iserver.h>
 
+#include <sourcehook/sourcehook_impl.h>
+#include <sourcehook/sourcehook_impl_chookmaninfo.h>
+
 #include <plugify/compat_format.hpp>
+#include <plugify/mem_hook.hpp>
+#include <plugify/assembly.hpp>
 #include <plugify/plugify.hpp>
 #include <plugify/plugin.hpp>
 #include <plugify/module.hpp>
@@ -32,17 +38,40 @@
 #include <chrono>
 #include <type_traits>
 
-CBaseGameSystemFactory **CBaseGameSystemFactory::sm_pFirst = nullptr;
-CBaseGameSystemFactory *sm_Factory = nullptr;
-CGameSystemEventDispatcher **g_ppEventDispatcher = nullptr;
+using namespace plugify;
+using namespace SourceHook;
+using namespace SourceHook::Impl;
+
+struct CSourceHookFriend
+{
+	typedef HookContextStack CSourceHookImpl::*type;
+	friend type get(CSourceHookFriend);
+};
+
+template<typename Tag, typename Tag::type M>
+struct Accessor
+{
+	friend typename Tag::type get(Tag)
+	{
+		return M;
+	}
+};
+
+template struct Accessor<CSourceHookFriend, &CSourceHookImpl::m_ContextStack>;
+
+SourceHook::ISourceHook* g_SHPtr = nullptr;
 
 namespace mm
 {
 	PlugifyPlugin g_Plugin;
 	PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
 
-	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, x)
-	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, x)
+	MemAddr CLightQueryGameSystem;
+	int ServerGamePostSimulateOffset;
+	int SetupHookLoopOffset;
+
+	#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, Color(255, 255, 0, 255), x)
+	#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, Color(255, 0, 0, 255), x)
 
 	template <typename S, typename T, typename F> requires (std::is_function_v<F>)
 	void Print(std::string& out, const T &t, F &f, std::string_view tab = "  ")
@@ -675,6 +704,202 @@ namespace mm
 	}
 	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
 
+	using FindOriginalAddrFn = void* (*)(void* pClass, void* pAddr);
+	FindOriginalAddrFn FindOriginalAddr;
+
+	using ServerGamePostSimulateFn = void (*)(IGameSystem*, const EventServerGamePostSimulate_t&);
+	ServerGamePostSimulateFn _ServerGamePostSimulate;
+	void ServerGamePostSimulate(IGameSystem* pThis, const EventServerGamePostSimulate_t& msg) {
+		_ServerGamePostSimulate(pThis, msg);
+
+		switch (g_Plugin.m_state)
+		{
+			case PlugifyState::Load:
+			{
+				auto pluginManager = g_Plugin.m_context->GetPluginManager().lock();
+				if (!pluginManager)
+				{
+					g_Plugin.m_state = PlugifyState::Wait;
+					return;
+				}
+
+				pluginManager->Initialize();
+				CONPRINT("Plugin manager was loaded.\n");
+				break;
+			}
+			case PlugifyState::Unload:
+			{
+				auto pluginManager = g_Plugin.m_context->GetPluginManager().lock();
+				if (!pluginManager)
+				{
+					g_Plugin.m_state = PlugifyState::Wait;
+					return;
+				}
+
+				pluginManager->Terminate();
+				CONPRINT("Plugin manager was unloaded.\n");
+				FindOriginalAddr = nullptr;
+				break;
+			}
+			case PlugifyState::Wait:
+				return;
+		}
+
+		g_Plugin.m_state = PlugifyState::Wait;
+	}
+
+	using SetupHookLoopFn = IHookContext* (*)(CSourceHookImpl *sh, CHookManager *hi, void *vfnptr, void *thisptr, void **origCallAddr, META_RES *statusPtr, META_RES *prevResPtr, META_RES *curResPtr, const void *origRetPtr, void *overrideRetPtr);
+	SetupHookLoopFn _SetupHookLoop;
+	IHookContext* SetupHookLoop(CSourceHookImpl *sh, CHookManager *hi, void *vfnptr, void *thisptr, void **origCallAddr, META_RES *statusPtr, META_RES *prevResPtr, META_RES *curResPtr, const void *origRetPtr, void *overrideRetPtr)
+	{
+		HookContextStack& contextStack = sh->*get(CSourceHookFriend());
+		CHookContext* pCtx = NULL;
+		CHookContext* oldctx = contextStack.empty() ? NULL : &contextStack.front();
+		if (oldctx)
+		{
+			// SH_CALL
+			if (oldctx->m_State == CHookContext::State_Ignore)
+			{
+				*statusPtr = MRES_IGNORED;
+				oldctx->m_CallOrig = true;
+				oldctx->m_State = CHookContext::State_Dead;
+
+				List<CVfnPtr*>& vfnptr_list = hi->GetVfnPtrList();
+				List<CVfnPtr*>::iterator vfnptr_iter;
+				for (vfnptr_iter = vfnptr_list.begin();
+					 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter)
+				{
+					if (**vfnptr_iter == vfnptr)
+						break;
+				}
+
+				if (FindOriginalAddr == nullptr)
+				{
+					Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
+					if (polyhook)
+					{
+						FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
+					}
+				}
+
+				if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr != nullptr)
+				{
+					void* origPtr = FindOriginalAddr(thisptr, *(void**)vfnptr);
+					if (origPtr != nullptr)
+					{
+						for (vfnptr_iter = vfnptr_list.begin();
+							 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter)
+						{
+							void** ptr = (void**)(*vfnptr_iter)->GetPtr();
+							if (*ptr == origPtr)
+								break;
+						}
+					}
+				}
+
+				if (vfnptr_iter == vfnptr_list.end())
+				{
+					// ASSERT
+				}
+				else
+				{
+					*origCallAddr = (*vfnptr_iter)->GetOrigCallAddr();
+					oldctx->pVfnPtr = *vfnptr_iter;
+				}
+
+				oldctx->pOrigRet = origRetPtr;
+
+				return oldctx;
+			}
+			// Recall
+			if (oldctx->m_State >= CHookContext::State_Recall_Pre && oldctx->m_State <= CHookContext::State_Recall_PostVP)
+			{
+				pCtx = oldctx;
+
+				*statusPtr = *(oldctx->pStatus);
+				*prevResPtr = *(oldctx->pPrevRes);
+
+				pCtx->m_Iter = oldctx->m_Iter;
+
+				// Only have possibility of calling the orig func in pre recall mode
+				pCtx->m_CallOrig = (oldctx->m_State == CHookContext::State_Recall_Pre || oldctx->m_State == CHookContext::State_Recall_PreVP);
+
+				overrideRetPtr = pCtx->pOverrideRet;
+
+				// When the status is low so there's no override return value and we're in a post recall,
+				// give it the orig return value as override return value.
+				if (pCtx->m_State == CHookContext::State_Recall_Post || pCtx->m_State == CHookContext::State_Recall_PostVP)
+				{
+					origRetPtr = oldctx->pOrigRet;
+					if (*statusPtr < MRES_OVERRIDE)
+						overrideRetPtr = const_cast<void*>(pCtx->pOrigRet);
+				}
+			}
+		}
+		if (!pCtx)
+		{
+			pCtx = contextStack.make_next();
+			pCtx->m_State = CHookContext::State_Born;
+			pCtx->m_CallOrig = true;
+		}
+
+		pCtx->pIface = NULL;
+
+		List<CVfnPtr*>& vfnptr_list = hi->GetVfnPtrList();
+		List<CVfnPtr*>::iterator vfnptr_iter;
+		for (vfnptr_iter = vfnptr_list.begin();
+			 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter)
+		{
+			if (**vfnptr_iter == vfnptr)
+				break;
+		}
+
+		// Workaround for overhooking
+		if (FindOriginalAddr == nullptr)
+		{
+			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
+			if (polyhook)
+			{
+				FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
+			}
+		}
+
+		if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr != nullptr)
+		{
+			void* origPtr = FindOriginalAddr(thisptr, *(void**)vfnptr);
+			if (origPtr != nullptr)
+			{
+				for (vfnptr_iter = vfnptr_list.begin();
+					 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter)
+				{
+					void** ptr = (void**)(*vfnptr_iter)->GetPtr();
+					if (*ptr == origPtr)
+						break;
+				}
+			}
+		}
+
+		if (vfnptr_iter == vfnptr_list.end())
+		{
+			pCtx->m_State = CHookContext::State_Dead;
+		}
+		else
+		{
+			pCtx->pVfnPtr = *vfnptr_iter;
+			*origCallAddr = pCtx->pVfnPtr->GetOrigCallAddr();
+			pCtx->pIface = pCtx->pVfnPtr->FindIface(thisptr);
+		}
+
+		pCtx->pStatus = statusPtr;
+		pCtx->pPrevRes = prevResPtr;
+		pCtx->pCurRes = curResPtr;
+		pCtx->pThisPtr = thisptr;
+		pCtx->pOverrideRet = overrideRetPtr;
+		pCtx->pOrigRet = origRetPtr;
+
+		return pCtx;
+	}
+
 	bool PlugifyPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 	{
 		PLUGIN_SAVEVARS();
@@ -688,10 +913,25 @@ namespace mm
 
 		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
 
-		m_context = plugify::MakePlugify();
+		std::filesystem::path path = Plat_GetGameDirectory();
+		path += PLUGIFY_GAME_BINARY PLUGIFY_LIBRARY_PREFIX "server" PLUGIFY_LIBRARY_SUFFIX;
+		Assembly server(path, {}, {}, true);
+		if (server) {
+			CLightQueryGameSystem = server.GetVirtualTableByName("CLightQueryGameSystem");
+			ServerGamePostSimulateOffset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
+			_ServerGamePostSimulate = HookMethod(&CLightQueryGameSystem, &ServerGamePostSimulate, ServerGamePostSimulateOffset);
+		}
+
+		if (g_SHPtr != nullptr)
+		{
+			SetupHookLoopOffset = GetVirtualTableIndex(&SourceHook::Impl::CSourceHookImpl::SetupHookLoop);
+			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, SetupHookLoopOffset);
+		}
+
+		m_context = MakePlugify();
 
 		m_logger = std::make_shared<MMLogger>("plugify");
-		m_logger->SetSeverity(plugify::Severity::Info);
+		m_logger->SetSeverity(Severity::Info);
 		m_context->SetLogger(m_logger);
 
 		std::filesystem::path rootDir(Plat_GetGameDirectory());
@@ -727,73 +967,18 @@ namespace mm
 
 	bool PlugifyPlugin::Unload(char *error, size_t maxlen)
 	{
+		if (_ServerGamePostSimulate)
+		{
+			HookMethod(&CLightQueryGameSystem, _ServerGamePostSimulate, ServerGamePostSimulateOffset);
+			_ServerGamePostSimulate = nullptr;
+		}
+		if (_SetupHookLoop)
+		{
+			HookMethod(g_SHPtr, _SetupHookLoop, SetupHookLoopOffset);
+			_SetupHookLoop = nullptr;
+		}
 		m_context.reset();
-		if (sm_Factory)
-		{
-			sm_Factory->Shutdown();
-			{
-				const auto *pGameSystem = sm_Factory->GetStaticGameSystem();
-				auto **ppDispatcher = g_ppEventDispatcher;
-				Assert(ppDispatcher);
-				auto *pDispatcher = *ppDispatcher;
-				if (pDispatcher)
-				{
-					auto *funcListeners = pDispatcher->m_funcListeners;
-					Assert(funcListeners);
-					for (auto &vecListeners : *funcListeners)
-					{
-						FOR_EACH_VEC(vecListeners, i)
-						{
-							if (vecListeners[i] == pGameSystem)
-							{
-								vecListeners.FastRemove(i);
-							}
-						}
-					}
-				}
-			}
-			sm_Factory->DestroyGameSystem(this);
-			sm_Factory->Destroy();
-			sm_Factory = nullptr;
-		}
 		return true;
-	}
-
-	GS_EVENT_MEMBER(PlugifyPlugin, ServerGamePostSimulate)
-	{
-		switch (m_state)
-		{
-			case PlugifyState::Load:
-			{
-				auto pluginManager = m_context->GetPluginManager().lock();
-				if (!pluginManager)
-				{
-					m_state = PlugifyState::Wait;
-					return;
-				}
-
-				pluginManager->Initialize();
-				CONPRINT("Plugin manager was loaded.\n");
-				break;
-			}
-			case PlugifyState::Unload:
-			{
-				auto pluginManager = m_context->GetPluginManager().lock();
-				if (!pluginManager)
-				{
-					m_state = PlugifyState::Wait;
-					return;
-				}
-
-				pluginManager->Terminate();
-				CONPRINT("Plugin manager was unloaded.\n");
-				break;
-			}
-			case PlugifyState::Wait:
-				return;
-		}
-
-		m_state = PlugifyState::Wait;
 	}
 
 	void PlugifyPlugin::AllPluginsLoaded()
@@ -874,14 +1059,4 @@ SMM_API PluginId Plugify_Id()
 SMM_API SourceHook::ISourceHook *Plugify_SourceHook()
 {
 	return mm::g_SHPtr;
-}
-
-SMM_API void Plugify_RegisterGameSystem(CBaseGameSystemFactory **ppFirstGameSystem, CGameSystemEventDispatcher** ppEventDispatcher)
-{
-	CBaseGameSystemFactory::sm_pFirst = ppFirstGameSystem;
-	g_ppEventDispatcher = ppEventDispatcher;
-	if (sm_Factory == nullptr)
-	{
-		sm_Factory = new CGameSystemStaticFactory<mm::PlugifyPlugin>("PlugifyGameSystem", &mm::g_Plugin);
-	}
 }
