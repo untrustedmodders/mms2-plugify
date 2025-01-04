@@ -701,7 +701,19 @@ namespace mm
 	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
 
 	using FindOriginalAddrFn = void* (*)(void* pClass, void* pAddr);
-	FindOriginalAddrFn FindOriginalAddr;
+	FindOriginalAddrFn _FindOriginalAddr;
+	bool FindOriginalAddr()
+	{
+		if (_FindOriginalAddr == nullptr)
+		{
+			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
+			if (polyhook)
+			{
+				_FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
+			}
+		}
+		return _FindOriginalAddr != nullptr;
+	}
 
 	using ServerGamePostSimulateFn = void (*)(IGameSystem*, const EventServerGamePostSimulate_t&);
 	ServerGamePostSimulateFn _ServerGamePostSimulate;
@@ -734,7 +746,7 @@ namespace mm
 
 				pluginManager->Terminate();
 				CONPRINT("Plugin manager was unloaded.\n");
-				FindOriginalAddr = nullptr;
+				_FindOriginalAddr = nullptr;
 				break;
 			}
 			case PlugifyState::Wait:
@@ -770,18 +782,9 @@ namespace mm
 				}
 
 				// Workaround for overhooking
-				if (FindOriginalAddr == nullptr)
+				if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr())
 				{
-					Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
-					if (polyhook)
-					{
-						FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
-					}
-				}
-
-				if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr != nullptr)
-				{
-					void* origPtr = FindOriginalAddr(thisptr, *(void**)vfnptr);
+					void* origPtr = _FindOriginalAddr(thisptr, *(void**)vfnptr);
 					if (origPtr != nullptr)
 					{
 						for (vfnptr_iter = vfnptr_list.begin();
@@ -852,18 +855,9 @@ namespace mm
 		}
 
 		// Workaround for overhooking
-		if (FindOriginalAddr == nullptr)
+		if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr())
 		{
-			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
-			if (polyhook)
-			{
-				FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
-			}
-		}
-
-		if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr != nullptr)
-		{
-			void* origPtr = FindOriginalAddr(thisptr, *(void**)vfnptr);
+			void* origPtr = _FindOriginalAddr(thisptr, *(void**)vfnptr);
 			if (origPtr != nullptr)
 			{
 				for (vfnptr_iter = vfnptr_list.begin();
