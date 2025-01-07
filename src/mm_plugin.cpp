@@ -906,7 +906,7 @@ namespace mm
 
 		std::filesystem::path path = Plat_GetGameDirectory();
 		path += PLUGIFY_GAME_BINARY PLUGIFY_LIBRARY_PREFIX "server" PLUGIFY_LIBRARY_SUFFIX;
-		Assembly server(path, {}, {}, true);
+		Assembly server(path, LoadFlag::Lazy | LoadFlag::Now, {}, true);
 		if (server) {
 			auto table = server.GetVirtualTableByName("CLightQueryGameSystem");
 			int offset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
