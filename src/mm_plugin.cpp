@@ -706,7 +706,7 @@ namespace mm
 	{
 		if (_FindOriginalAddr == nullptr)
 		{
-			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX);
+			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX, LoadFlag::Lazy | LoadFlag::Now);
 			if (polyhook)
 			{
 				_FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
@@ -792,7 +792,9 @@ namespace mm
 						{
 							void** ptr = (void**)(*vfnptr_iter)->GetPtr();
 							if (*ptr == origPtr)
+							{
 								break;
+							}
 						}
 					}
 				}
@@ -800,6 +802,8 @@ namespace mm
 				if (vfnptr_iter == vfnptr_list.end())
 				{
 					// ASSERT
+					std::puts("Could not find original address");
+					std::terminate();
 				}
 				else
 				{
@@ -865,7 +869,9 @@ namespace mm
 				{
 					void** ptr = (void**)(*vfnptr_iter)->GetPtr();
 					if (*ptr == origPtr)
+					{
 						break;
+					}
 				}
 			}
 		}
@@ -907,7 +913,8 @@ namespace mm
 		std::filesystem::path path = Plat_GetGameDirectory();
 		path += PLUGIFY_GAME_BINARY PLUGIFY_LIBRARY_PREFIX "server" PLUGIFY_LIBRARY_SUFFIX;
 		Assembly server(path, LoadFlag::Lazy | LoadFlag::Now, {}, true);
-		if (server) {
+		if (server)
+		{
 			auto table = server.GetVirtualTableByName("CLightQueryGameSystem");
 			int offset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
 			_ServerGamePostSimulate = HookMethod(&table, &ServerGamePostSimulate, offset);
@@ -915,7 +922,7 @@ namespace mm
 
 		if (g_SHPtr != nullptr)
 		{
-			int offset = GetVirtualTableIndex(&SourceHook::Impl::CSourceHookImpl::SetupHookLoop);
+			int offset = GetVirtualTableIndex(&ISourceHook::SetupHookLoop);
 			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, offset);
 		}
 
