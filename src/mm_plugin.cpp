@@ -706,10 +706,14 @@ namespace mm
 	{
 		if (_FindOriginalAddr == nullptr)
 		{
-			Assembly polyhook(PLUGIFY_LIBRARY_PREFIX "polyhook" PLUGIFY_LIBRARY_SUFFIX, LoadFlag::Lazy | LoadFlag::Now);
+			Assembly polyhook("polyhook", LoadFlag::Lazy | LoadFlag::Now);
 			if (polyhook)
 			{
 				_FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
+			}
+			else
+			{
+				throw std::runtime_error("PolyHook not found, therefore SourceHook could not be patched.\n");
 			}
 		}
 		return _FindOriginalAddr != nullptr;
