@@ -78,6 +78,11 @@ void MMLogger::Log(std::string_view message, plugify::Severity severity) {
 		std::string sMessage = std::format("{}\n", message);
 
 		switch (severity) {
+			case plugify::Severity::None: {
+				Log(LS_MESSAGE, Color(255, 255, 255, 255), sMessage.c_str());
+				break;
+			}
+
 			case plugify::Severity::Fatal: {
 				Log(LS_ERROR, Color(255, 0, 255, 255), sMessage.c_str());
 				break;
@@ -108,7 +113,7 @@ void MMLogger::Log(std::string_view message, plugify::Severity severity) {
 				break;
 			}
 
-			case plugify::Severity::None: {
+			default: {
 				break;
 			}
 		}
