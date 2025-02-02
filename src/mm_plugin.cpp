@@ -131,14 +131,6 @@ namespace mm {
 		}
 	}
 
-	std::string FormatTime(std::string_view format = "%Y-%m-%d %H:%M:%S") {
-		auto now = std::chrono::system_clock::now();
-		auto timeT = std::chrono::system_clock::to_time_t(now);
-		std::stringstream ss;
-		ss << std::put_time(std::localtime(&timeT), format.data());
-		return ss.str();
-	}
-
 	ptrdiff_t FormatInt(const std::string& str) {
 		try {
 			size_t pos;
@@ -192,6 +184,7 @@ namespace mm {
 						 "Plugin Manager commands:\n"
 						 "  load           - Load plugin manager\n"
 						 "  unload         - Unload plugin manager\n"
+						 "  reload         - Reload plugin manager\n"
 						 "  modules        - List running modules\n"
 						 "  plugins        - List running plugins\n"
 						 "  plugin <name>  - Show information about a module\n"
@@ -255,6 +248,15 @@ namespace mm {
 				}
 			}
 
+			else if (arguments[1] == "reload") {
+				if (!pluginManager->IsInitialized()) {
+					CONPRINTE("Plugin manager not loaded.");
+					packageManager->Reload();
+				} else {
+					g_Plugin.m_state = PlugifyState::Reload;
+				}
+			}
+
 			else if (arguments[1] == "plugins") {
 				if (!pluginManager->IsInitialized()) {
 					CONPRINTE("You must load plugin manager before query any information from it.\n");
@@ -292,18 +294,18 @@ namespace mm {
 						return;
 					}
 					auto plugin = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindPluginFromId(FormatInt(arguments[2])) : pluginManager->FindPlugin(arguments[2]);
-					if (plugin.has_value()) {
+					if (plugin) {
 						std::string sMessage;
-						Print<plugify::PluginState>(sMessage, "Plugin", *plugin, plugify::PluginUtils::ToString);
-						auto descriptor = plugin->GetDescriptor();
+						Print<plugify::PluginState>(sMessage, "Plugin", plugin, plugify::PluginUtils::ToString);
+						auto descriptor = plugin.GetDescriptor();
 						std::format_to(std::back_inserter(sMessage), "  Language module: {}\n", descriptor.GetLanguageModule());
 						sMessage += "  Dependencies: \n";
 						for (const auto& reference: descriptor.GetDependencies()) {
 							auto dependency = pluginManager->FindPlugin(reference.GetName());
-							if (dependency.has_value()) {
-								Print<plugify::PluginState>(sMessage, *dependency, plugify::PluginUtils::ToString, "    ");
+							if (dependency) {
+								Print<plugify::PluginState>(sMessage, dependency, plugify::PluginUtils::ToString, "    ");
 							} else {
-								std::format_to(std::back_inserter(sMessage), "    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? std::to_string(*reference.GetRequestedVersion()) : "[latest]");
+								std::format_to(std::back_inserter(sMessage), "    {} <Missing> (v{})", reference.GetName(), reference.GetRequestedVersion().has_value() ? reference.GetRequestedVersion()->to_string() : "[latest]");
 							}
 						}
 						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", descriptor.GetEntryPoint());
@@ -324,12 +326,12 @@ namespace mm {
 						return;
 					}
 					auto module = options.contains("--uuid") || options.contains("-u") ? pluginManager->FindModuleFromId(FormatInt(arguments[2])) : pluginManager->FindModule(arguments[2]);
-					if (module.has_value()) {
+					if (module) {
 						std::string sMessage;
 
-						Print<plugify::ModuleState>(sMessage, "Module", *module, plugify::ModuleUtils::ToString);
-						std::format_to(std::back_inserter(sMessage), "  Language: {}\n", module->GetLanguage());
-						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", std::filesystem::path(module->GetFilePath()).string());
+						Print<plugify::ModuleState>(sMessage, "Module", module, plugify::ModuleUtils::ToString);
+						std::format_to(std::back_inserter(sMessage), "  Language: {}\n", module.GetLanguage());
+						std::format_to(std::back_inserter(sMessage), "  File: {}\n\n", std::filesystem::path(module.GetFilePath()).string());
 
 						CONPRINT(sMessage.c_str());
 					} else {
@@ -345,7 +347,7 @@ namespace mm {
 					CONPRINTE("You must unload plugin manager before bring any change with package manager.\n");
 					return;
 				}
-				packageManager->SnapshotPackages(plugify->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", FormatTime("%Y_%m_%d_%H_%M_%S")), true);
+				packageManager->SnapshotPackages(plugify->GetConfig().baseDir / std::format("snapshot_{}.wpackagemanifest", DateTime::Get("%Y_%m_%d_%H_%M_%S")), true);
 			}
 
 			else if (arguments[1] == "repo") {
@@ -564,6 +566,8 @@ namespace mm {
 	void ServerGamePostSimulate(IGameSystem* pThis, const EventServerGamePostSimulate_t& msg) {
 		_ServerGamePostSimulate(pThis, msg);
 
+		g_Plugin.m_context->Update();
+
 		switch (g_Plugin.m_state) {
 			case PlugifyState::Load: {
 				auto pluginManager = g_Plugin.m_context->GetPluginManager().lock();
@@ -590,6 +594,24 @@ namespace mm {
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
 				}
+				break;
+			}
+			case PlugifyState::Reload: {
+				auto pluginManager = g_Plugin.m_context->GetPluginManager().lock();
+				if (!pluginManager) {
+					g_Plugin.m_state = PlugifyState::Wait;
+					return;
+				}
+
+				pluginManager->Terminate();
+				_FindOriginalAddr = nullptr;
+
+				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
+					packageManager->Reload();
+				}
+
+				pluginManager->Initialize();
+				CONPRINT("Plugin manager was reloaded.");
 				break;
 			}
 			case PlugifyState::Wait:
@@ -756,7 +778,7 @@ namespace mm {
 		std::filesystem::path rootDir(Plat_GetGameDirectory());
 		auto result = m_context->Initialize(rootDir / "csgo");
 		if (result) {
-			m_logger->SetSeverity(m_context->GetConfig().logSeverity);
+			m_logger->SetSeverity(m_context->GetConfig().logSeverity.value_or(plugify::Severity::Debug));
 
 			if (auto packageManager = m_context->GetPackageManager().lock()) {
 				packageManager->Initialize();

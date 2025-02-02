@@ -26,7 +26,8 @@ namespace mm {
 	enum class PlugifyState {
 		Wait,
 		Load,
-		Unload
+		Unload,
+		Reload
 	};
 
 	class PlugifyPlugin : public ISmmPlugin {
