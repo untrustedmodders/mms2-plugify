@@ -79,7 +79,7 @@ namespace mm {
 		if (!versionName.empty()) {
 			std::format_to(std::back_inserter(out), " ({})", versionName);
 		} else {
-			std::format_to(std::back_inserter(out), " (v{})", descriptor.GetVersion());
+			std::format_to(std::back_inserter(out), " ({})", descriptor.GetVersion());
 		}
 		const auto& createdBy = descriptor.GetCreatedBy();
 		if (!createdBy.empty()) {
@@ -214,7 +214,7 @@ namespace mm {
 
 			else if (arguments[1] == "version" || arguments[1] == "-v") {
 				CONPRINT(R"(      ____)" "\n"
-						 R"( ____|    \         Plugify v)" PLUGIFY_PROJECT_VERSION "\n"
+						 R"( ____|    \         Plugify )" PLUGIFY_PROJECT_VERSION "\n"
 						 R"((____|     `._____  )" "Copyright (C) 2023-" PLUGIFY_PROJECT_YEAR " Untrusted Modders Team\n"
 						 R"( ____|       _|___)" "\n"
 						 R"((____|     .'       This program may be freely redistributed under)" "\n"
