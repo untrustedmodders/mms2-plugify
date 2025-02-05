@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/untrustedmodders/mms2-plugify/compare/v1.0.1...v1.0.2) (2025-02-05)
+
+
+### Bug Fixes
+
+* update plugify and s2sdk ([e659273](https://github.com/untrustedmodders/mms2-plugify/commit/e6592730d812baa96b6769e3306a7c10a1572566))
+* version print ([3b55616](https://github.com/untrustedmodders/mms2-plugify/commit/3b55616a5050bcd0760173f257201f1df1ceefbb))
+
 ## [1.0.1](https://github.com/untrustedmodders/mms2-plugify/compare/v1.0.0...v1.0.1) (2025-02-05)
 
 
