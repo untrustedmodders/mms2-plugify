@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/untrustedmodders/mms2-plugify/compare/v1.0.2...v1.1.0) (2025-02-10)
+
+
+### Features
+
+* **Source SDK:** update submodule ([dd78361](https://github.com/untrustedmodders/mms2-plugify/commit/dd78361876005b1da8508a219de95dc85599ec60))
+
 ## [1.0.2](https://github.com/untrustedmodders/mms2-plugify/compare/v1.0.1...v1.0.2) (2025-02-05)
 
 
