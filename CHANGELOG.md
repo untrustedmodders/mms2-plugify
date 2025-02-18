@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.0...v1.1.1) (2025-02-18)
+
+
+### Bug Fixes
+
+* **plugify:** fixes compilation way with newest MSVC ([e75c3e5](https://github.com/untrustedmodders/mms2-plugify/commit/e75c3e56e99a180ff84e4b0e554f4dee32a82ca3))
+* update plugify & sdk ([0b47930](https://github.com/untrustedmodders/mms2-plugify/commit/0b479302955d8862890be60dc5f681f8d17bb297))
+
 ## [1.1.0](https://github.com/untrustedmodders/mms2-plugify/compare/v1.0.2...v1.1.0) (2025-02-10)
 
 
