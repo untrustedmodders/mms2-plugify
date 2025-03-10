@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.3...v1.1.4) (2025-03-10)
+
+
+### Bug Fixes
+
+* **Source SDK:** fix linkage with `steam_api` ([bf4b0e3](https://github.com/untrustedmodders/mms2-plugify/commit/bf4b0e32dccd39c3a7629fded117421c06504bd1))
+
 ## [1.1.3](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.2...v1.1.3) (2025-03-10)
 
 
