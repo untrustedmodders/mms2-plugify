@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.2...v1.1.3) (2025-03-10)
+
+
+### Bug Fixes
+
+* **update:** Source module staff ([e683594](https://github.com/untrustedmodders/mms2-plugify/commit/e683594a58a7ba5ef5d2913a30ad798c01bb9c00))
+
 ## [1.1.2](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.1...v1.1.2) (2025-03-09)
 
 
