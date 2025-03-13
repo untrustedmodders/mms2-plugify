@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.5](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.4...v1.1.5) (2025-03-13)
+
+
+### Bug Fixes
+
+* rework sourcehook fix ([9451a96](https://github.com/untrustedmodders/mms2-plugify/commit/9451a962b2c70d1a0d1f2f47d79c9becc21a3af0))
+* update plugify ([138d810](https://github.com/untrustedmodders/mms2-plugify/commit/138d810e7da082b91978b529ef4f0304cdc90526))
+
 ## [1.1.4](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.3...v1.1.4) (2025-03-10)
 
 
