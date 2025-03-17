@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.7](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.6...v1.1.7) (2025-03-17)
+
+
+### Bug Fixes
+
+* add abi0 ([5363874](https://github.com/untrustedmodders/mms2-plugify/commit/53638746b3638d0cb6ca5ea5f7a449b8e6ff0e3b))
+* enable steamworks ([6d23152](https://github.com/untrustedmodders/mms2-plugify/commit/6d23152c3354ff37fb5e399cd848170a8173d2c4))
+* update plugify ([19729fa](https://github.com/untrustedmodders/mms2-plugify/commit/19729fac9e555a92a71f9dfd425a7c54ac2a8108))
+* update sdk ([a3ef3d3](https://github.com/untrustedmodders/mms2-plugify/commit/a3ef3d3cb540f8eebc9c9f75b19001422c1f0182))
+
 ## [1.1.6](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.5...v1.1.6) (2025-03-13)
 
 
