@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.8](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.7...v1.1.8) (2025-03-22)
+
+
+### Bug Fixes
+
+* add golang ([8cc323b](https://github.com/untrustedmodders/mms2-plugify/commit/8cc323bb9c38efdd62bc88a3bd0c49ee0d7663b7))
+* update action build ([d6b71c3](https://github.com/untrustedmodders/mms2-plugify/commit/d6b71c3f0459cc53380c79ff4a641ea0c0a72f90))
+* update config ([2555d98](https://github.com/untrustedmodders/mms2-plugify/commit/2555d98847d33d7bf0c5b313917d60d448a9bc66))
+
 ## [1.1.7](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.6...v1.1.7) (2025-03-17)
 
 
