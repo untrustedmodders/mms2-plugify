@@ -545,7 +545,7 @@ namespace mm {
 	}
 	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
 
-	using FindOriginalAddrFn = void* (*) (void* pClass, void* pAddr);
+	/*using FindOriginalAddrFn = void* (*) (void* pClass, void* pAddr);
 	FindOriginalAddrFn _FindOriginalAddr;
 	bool FindOriginalAddr() {
 		if (_FindOriginalAddr == nullptr) {
@@ -681,6 +681,7 @@ namespace mm {
 
 		return pCtx;
 	}
+	*/
 
 	using ServerGamePostSimulateFn = void (*)(IGameSystem*, const EventServerGamePostSimulate_t&);
 	ServerGamePostSimulateFn _ServerGamePostSimulate;
@@ -710,7 +711,7 @@ namespace mm {
 
 				pluginManager->Terminate();
 				CONPRINT("Plugin manager was unloaded.\n");
-				_FindOriginalAddr = nullptr;
+				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
@@ -725,7 +726,7 @@ namespace mm {
 				}
 
 				pluginManager->Terminate();
-				_FindOriginalAddr = nullptr;
+				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
@@ -764,10 +765,10 @@ namespace mm {
 			_ServerGamePostSimulate = HookMethod(&table, &ServerGamePostSimulate, offset);
 		}
 
-		if (g_SHPtr != nullptr) {
+		/*if (g_SHPtr != nullptr) {
 			int offset = GetVirtualTableIndex(&ISourceHook::SetupHookLoop);
 			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, offset);
-		}
+		}*/
 
 		m_context = MakePlugify();
 
@@ -869,7 +870,7 @@ SMM_API PluginId Plugify_Id() {
 SMM_API SourceHook::ISourceHook* Plugify_SourceHook() {
 	return mm::g_SHPtr;
 }
-/*
+
 struct CSourceHookFriend {
 	typedef CHookIDManager CSourceHookImpl::* type;
 	friend type get(CSourceHookFriend);
@@ -901,10 +902,10 @@ SMM_API bool Plugify_SourceHooked(void* vfnptr) {
 	const CHookIDManager& hookIdManager = sh.*get(CSourceHookFriend());
 	for (const CHookIDManager::Entry& entry : hookIdManager.*get(CHookIDManagerFriend())) {
 		if (entry.vfnptr == vfnptr) {
-			//CONPRINT(std::format("Sourcehooked **vfnptr** was pathed: {}\n", vfnptr).c_str());
+			CONPRINT(std::format("Sourcehooked **vfnptr** was pathed: {}\n", vfnptr).c_str());
 			return true;
 		}
 	}
-	//CONPRINTE(std::format("**vfnptr** was not pathed!!!\n", vfnptr).c_str());
+	CONPRINTE(std::format("**vfnptr** was not pathed!!!\n", vfnptr).c_str());
 	return false;
-}*/
+}
