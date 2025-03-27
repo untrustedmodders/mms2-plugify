@@ -75,7 +75,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path build\addons\plugify\bin\win64
           Move-Item -Path build\${{ env.BUILD_TYPE }}\plugify.dll -Destination build\addons\plugify\bin\win64
           New-Item -ItemType Directory -Force -Path build\output
-          Move-Item -Force -Path build/bin -Destination build/output
+          Move-Item -Force -Path build/addons -Destination build/output
           Move-Item -Path build\plugify.pconfig -Destination build\output
 
       - uses: actions/upload-artifact@v4
