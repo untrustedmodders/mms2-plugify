@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.10](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.9...v1.1.10) (2025-03-27)
+
+
+### Bug Fixes
+
+* build typo ([bbedee1](https://github.com/untrustedmodders/mms2-plugify/commit/bbedee1a3f159dc6b1eecbe91cafa46d692faf90))
+
 ## [1.1.9](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.8...v1.1.9) (2025-03-27)
 
 
