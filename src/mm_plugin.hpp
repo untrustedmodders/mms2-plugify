@@ -49,7 +49,7 @@ namespace mm {
 
 	public:// Fields
 		IMetamodListener m_listener;
-		std::shared_ptr<MMLogger> m_logger;
+		std::shared_ptr<Logger> m_logger;
 		std::shared_ptr<plugify::IPlugify> m_context;
 		PlugifyState m_state{};
 	};

@@ -9,10 +9,10 @@
 #include <plugify/log.hpp>
 
 namespace mm {
-	class MMLogger final : public plugify::ILogger {
+	class Logger final : public plugify::ILogger {
 	public:
-		MMLogger(const char* name, int flags = 0, LoggingVerbosity_t verbosity = LV_DEFAULT, const Color& defaultColor = UNSPECIFIED_LOGGING_COLOR);
-		~MMLogger() override = default;
+		Logger(const char* name, int flags = 0, LoggingVerbosity_t verbosity = LV_DEFAULT, const Color& defaultColor = UNSPECIFIED_LOGGING_COLOR);
+		~Logger() override = default;
 
 		bool IsChannelEnabled(LoggingSeverity_t severity) const;
 		bool IsChannelEnabled(LoggingVerbosity_t verbosity) const;

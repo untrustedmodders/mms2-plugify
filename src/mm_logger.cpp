@@ -1,39 +1,38 @@
 #include "mm_logger.hpp"
-#include "mm_plugin.hpp"
 
 using namespace mm;
 
-MMLogger::MMLogger(const char* name, int flags, LoggingVerbosity_t verbosity, const Color& defaultColor) {
+Logger::Logger(const char* name, int flags, LoggingVerbosity_t verbosity, const Color& defaultColor) {
 	m_channelID = LoggingSystem_RegisterLoggingChannel(name, nullptr, flags, verbosity, defaultColor);
 }
 
-bool MMLogger::IsChannelEnabled(LoggingSeverity_t severity) const {
+bool Logger::IsChannelEnabled(LoggingSeverity_t severity) const {
 	return LoggingSystem_IsChannelEnabled(m_channelID, severity);
 }
 
-bool MMLogger::IsChannelEnabled(LoggingVerbosity_t verbosity) const {
+bool Logger::IsChannelEnabled(LoggingVerbosity_t verbosity) const {
 	return LoggingSystem_IsChannelEnabled(m_channelID, verbosity);
 }
 
-LoggingVerbosity_t MMLogger::GetChannelVerbosity() const {
+LoggingVerbosity_t Logger::GetChannelVerbosity() const {
 	return LoggingSystem_GetChannelVerbosity(m_channelID);
 }
 
-Color MMLogger::GetColor() const {
+Color Logger::GetColor() const {
 	Color rgba;
 	rgba.SetRawColor(LoggingSystem_GetChannelColor(m_channelID));
 	return rgba;
 }
 
-LoggingChannelFlags_t MMLogger::GetFlags() const {
+LoggingChannelFlags_t Logger::GetFlags() const {
 	return LoggingSystem_GetChannelFlags(m_channelID);
 }
 
-void MMLogger::SetSeverity(plugify::Severity severity) {
+void Logger::SetSeverity(plugify::Severity severity) {
 	m_severity = severity;
 }
 
-LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const char* message) const {
+LoggingResponse_t Logger::Log(LoggingSeverity_t severity, const char* message) const {
 	LoggingResponse_t response = LR_ABORT;
 
 	if (IsChannelEnabled(severity)) {
@@ -43,7 +42,7 @@ LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const char* message)
 	return response;
 }
 
-LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const Color& color, const char* message) const {
+LoggingResponse_t Logger::Log(LoggingSeverity_t severity, const Color& color, const char* message) const {
 	LoggingResponse_t response = LR_ABORT;
 
 	if (IsChannelEnabled(severity)) {
@@ -53,7 +52,7 @@ LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const Color& color, 
 	return response;
 }
 
-LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t& code, const char* message) const {
+LoggingResponse_t Logger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t& code, const char* message) const {
 	LoggingResponse_t response = LR_ABORT;
 
 	if (IsChannelEnabled(severity)) {
@@ -63,7 +62,7 @@ LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t
 	return response;
 }
 
-LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t& code, const Color& color, const char* message) const {
+LoggingResponse_t Logger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t& code, const Color& color, const char* message) const {
 	LoggingResponse_t response = LR_ABORT;
 
 	if (IsChannelEnabled(severity)) {
@@ -73,7 +72,7 @@ LoggingResponse_t MMLogger::Log(LoggingSeverity_t severity, const LeafCodeInfo_t
 	return response;
 }
 
-void MMLogger::Log(std::string_view message, plugify::Severity severity) {
+void Logger::Log(std::string_view message, plugify::Severity severity) {
 	if (severity <= m_severity) {
 		std::string sMessage = std::format("{}\n", message);
 
