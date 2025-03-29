@@ -13,11 +13,13 @@
  */
 
 #include "mm_plugin.hpp"
+#include "mm_vhook.hpp"
 
 #include <igameevents.h>
 #include <igamesystem.h>
 #include <iserver.h>
 
+#include <sourcehook/sourcehook_pibuilder.h>
 #include <sourcehook/sourcehook_impl.h>
 #include <sourcehook/sourcehook_impl_chookmaninfo.h>
 
@@ -42,29 +44,14 @@ using namespace plugify;
 using namespace SourceHook;
 using namespace SourceHook::Impl;
 
-SourceHook::ISourceHook* g_SHPtr = nullptr;
+mm::PlugifyPlugin g_Plugin;
+PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
+SourceHook::IHookManagerAutoGen* g_pHookManager = nullptr;
 
-struct CSourceHookImplFriend {
-	typedef HookContextStack CSourceHookImpl::* type;
-	friend type get(CSourceHookImplFriend);
-};
-
-template<typename Tag, typename Tag::type M>
-struct CSourceHookImplAccessor {
-	friend typename Tag::type get(Tag) {
-		return M;
-	}
-};
-
-template struct CSourceHookImplAccessor<CSourceHookImplFriend, &CSourceHookImpl::m_ContextStack>;
+#define CONPRINT(x) g_Plugin.m_logger->Log(LS_MESSAGE, Color(255, 255, 0, 255), x)
+#define CONPRINTE(x) g_Plugin.m_logger->Log(LS_WARNING, Color(255, 0, 0, 255), x)
 
 namespace mm {
-	PlugifyPlugin g_Plugin;
-	PLUGIN_EXPOSE(PlugifyPlugin, g_Plugin);
-
-#define CONPRINT(x) mm::g_Plugin.m_logger->Log(LS_MESSAGE, Color(255, 255, 0, 255), x)
-#define CONPRINTE(x) mm::g_Plugin.m_logger->Log(LS_WARNING, Color(255, 0, 0, 255), x)
-
 	template<typename S, typename T, typename F>
 		requires(std::is_function_v<F>)
 	void Print(std::string& out, const T& t, F& f, std::string_view tab = "  ") {
@@ -545,143 +532,6 @@ namespace mm {
 	}
 	static ConCommand plg_command("plg", plugify_callback, "Plugify control options", 0);
 
-	using FindOriginalAddrFn = void* (*) (void* pClass, void* pAddr);
-	FindOriginalAddrFn _FindOriginalAddr;
-	bool FindOriginalAddr() {
-		if (_FindOriginalAddr == nullptr) {
-			Assembly polyhook("polyhook", LoadFlag::Lazy | LoadFlag::Now);
-			if (polyhook) {
-				_FindOriginalAddr = polyhook.GetFunctionByName("FindOriginalAddr").CCast<FindOriginalAddrFn>();
-			}
-			else
-			{
-				throw std::runtime_error("PolyHook not found, therefore SourceHook could not be patched.\n");
-			}
-		}
-		return _FindOriginalAddr != nullptr;
-	}
-
-	using SetupHookLoopFn = IHookContext* (*) (CSourceHookImpl* sh, CHookManager* hi, void* vfnptr, void* thisptr, void** origCallAddr, META_RES* statusPtr, META_RES* prevResPtr, META_RES* curResPtr, const void* origRetPtr, void* overrideRetPtr);
-	[[maybe_unused]] SetupHookLoopFn _SetupHookLoop;
-	IHookContext* SetupHookLoop(CSourceHookImpl* sh, CHookManager* hi, void* vfnptr, void* thisptr, void** origCallAddr, META_RES* statusPtr, META_RES* prevResPtr, META_RES* curResPtr, const void* origRetPtr, void* overrideRetPtr) {
-		HookContextStack& contextStack = sh->*get(CSourceHookImplFriend());
-		CHookContext* pCtx = NULL;
-		CHookContext* oldctx = contextStack.empty() ? NULL : &contextStack.front();
-		if (oldctx) {
-			// SH_CALL
-			if (oldctx->m_State == CHookContext::State_Ignore) {
-				*statusPtr = MRES_IGNORED;
-				oldctx->m_CallOrig = true;
-				oldctx->m_State = CHookContext::State_Dead;
-
-				List<CVfnPtr*>& vfnptr_list = hi->GetVfnPtrList();
-				List<CVfnPtr*>::iterator vfnptr_iter;
-				for (vfnptr_iter = vfnptr_list.begin();
-					 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter) {
-					if (**vfnptr_iter == vfnptr)
-						break;
-				}
-
-				// Workaround for overhooking
-				if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr()) {
-					void* origPtr = _FindOriginalAddr(thisptr, *(void**) vfnptr);
-					if (origPtr != nullptr) {
-						for (vfnptr_iter = vfnptr_list.begin();
-							 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter) {
-							void** ptr = (void**) (*vfnptr_iter)->GetPtr();
-							if (*ptr == origPtr)
-							{
-								break;
-							}
-						}
-					}
-				}
-
-				if (vfnptr_iter == vfnptr_list.end()) {
-					// ASSERT
-					std::puts("Could not find original address");
-					std::terminate();
-				} else {
-					*origCallAddr = (*vfnptr_iter)->GetOrigCallAddr();
-					oldctx->pVfnPtr = *vfnptr_iter;
-				}
-
-				oldctx->pOrigRet = origRetPtr;
-
-				return oldctx;
-			}
-			// Recall
-			if (oldctx->m_State >= CHookContext::State_Recall_Pre && oldctx->m_State <= CHookContext::State_Recall_PostVP) {
-				pCtx = oldctx;
-
-				*statusPtr = *(oldctx->pStatus);
-				*prevResPtr = *(oldctx->pPrevRes);
-
-				pCtx->m_Iter = oldctx->m_Iter;
-
-				// Only have possibility of calling the orig func in pre recall mode
-				pCtx->m_CallOrig = (oldctx->m_State == CHookContext::State_Recall_Pre || oldctx->m_State == CHookContext::State_Recall_PreVP);
-
-				overrideRetPtr = pCtx->pOverrideRet;
-
-				// When the status is low so there's no override return value and we're in a post recall,
-				// give it the orig return value as override return value.
-				if (pCtx->m_State == CHookContext::State_Recall_Post || pCtx->m_State == CHookContext::State_Recall_PostVP) {
-					origRetPtr = oldctx->pOrigRet;
-					if (*statusPtr < MRES_OVERRIDE)
-						overrideRetPtr = const_cast<void*>(pCtx->pOrigRet);
-				}
-			}
-		}
-		if (!pCtx) {
-			pCtx = contextStack.make_next();
-			pCtx->m_State = CHookContext::State_Born;
-			pCtx->m_CallOrig = true;
-		}
-
-		pCtx->pIface = NULL;
-
-		List<CVfnPtr*>& vfnptr_list = hi->GetVfnPtrList();
-		List<CVfnPtr*>::iterator vfnptr_iter;
-		for (vfnptr_iter = vfnptr_list.begin();
-			 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter) {
-			if (**vfnptr_iter == vfnptr)
-				break;
-		}
-
-		// Workaround for overhooking
-		if (vfnptr_iter == vfnptr_list.end() && FindOriginalAddr()) {
-			void* origPtr = _FindOriginalAddr(thisptr, *(void**) vfnptr);
-			if (origPtr != nullptr) {
-				for (vfnptr_iter = vfnptr_list.begin();
-					 vfnptr_iter != vfnptr_list.end(); ++vfnptr_iter) {
-					void** ptr = (void**) (*vfnptr_iter)->GetPtr();
-					if (*ptr == origPtr)
-					{
-						break;
-					}
-				}
-			}
-		}
-
-		if (vfnptr_iter == vfnptr_list.end()) {
-			pCtx->m_State = CHookContext::State_Dead;
-		} else {
-			pCtx->pVfnPtr = *vfnptr_iter;
-			*origCallAddr = pCtx->pVfnPtr->GetOrigCallAddr();
-			pCtx->pIface = pCtx->pVfnPtr->FindIface(thisptr);
-		}
-
-		pCtx->pStatus = statusPtr;
-		pCtx->pPrevRes = prevResPtr;
-		pCtx->pCurRes = curResPtr;
-		pCtx->pThisPtr = thisptr;
-		pCtx->pOverrideRet = overrideRetPtr;
-		pCtx->pOrigRet = origRetPtr;
-
-		return pCtx;
-	}
-
 	using ServerGamePostSimulateFn = void (*)(IGameSystem*, const EventServerGamePostSimulate_t&);
 	ServerGamePostSimulateFn _ServerGamePostSimulate;
 	void ServerGamePostSimulate(IGameSystem* pThis, const EventServerGamePostSimulate_t& msg) {
@@ -710,7 +560,7 @@ namespace mm {
 
 				pluginManager->Terminate();
 				CONPRINT("Plugin manager was unloaded.\n");
-				_FindOriginalAddr = nullptr;
+				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
@@ -725,7 +575,7 @@ namespace mm {
 				}
 
 				pluginManager->Terminate();
-				_FindOriginalAddr = nullptr;
+				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
@@ -750,6 +600,8 @@ namespace mm {
 		GET_V_IFACE_CURRENT(GetServerFactory, g_pSource2Server, ISource2Server, SOURCE2SERVER_INTERFACE_VERSION);
 		GET_V_IFACE_CURRENT(GetEngineFactory, g_pNetworkServerService, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
 
+		g_pHookManager = static_cast<SourceHook::IHookManagerAutoGen *>(ismm->MetaFactory(MMIFACE_SH_HOOKMANAUTOGEN, NULL, NULL));
+
 		g_SMAPI->AddListener(this, &m_listener);
 
 		ConVar_Register(FCVAR_RELEASE | FCVAR_SERVER_CAN_EXECUTE | FCVAR_GAMEDLL);
@@ -757,21 +609,20 @@ namespace mm {
 		std::filesystem::path path = Plat_GetGameDirectory();
 		path += PLUGIFY_GAME_BINARY PLUGIFY_LIBRARY_PREFIX "server" PLUGIFY_LIBRARY_SUFFIX;
 		Assembly server(path, LoadFlag::Lazy | LoadFlag::Now, {}, true);
-		if (server)
-		{
+		if (server) {
 			auto table = server.GetVirtualTableByName("CLightQueryGameSystem");
 			int offset = GetVirtualTableIndex(&IGameSystem::ServerGamePostSimulate);
 			_ServerGamePostSimulate = HookMethod(&table, &ServerGamePostSimulate, offset);
 		}
 
-		if (g_SHPtr != nullptr) {
+		/*if (g_SHPtr != nullptr) {
 			int offset = GetVirtualTableIndex(&ISourceHook::SetupHookLoop);
 			_SetupHookLoop = HookMethod(g_SHPtr, &SetupHookLoop, offset);
-		}
+		}*/
 
 		m_context = MakePlugify();
 
-		m_logger = std::make_shared<MMLogger>("plugify");
+		m_logger = std::make_shared<Logger>("plugify");
 		m_logger->SetSeverity(Severity::Info);
 		m_context->SetLogger(m_logger);
 
@@ -851,60 +702,34 @@ namespace mm {
 }// namespace mm
 
 SMM_API IMetamodListener* Plugify_ImmListener() {
-	return &mm::g_Plugin.m_listener;
+	return &g_Plugin.m_listener;
 }
 
 SMM_API ISmmAPI* Plugify_ISmmAPI() {
-	return mm::g_SMAPI;
+	return g_SMAPI;
 }
 
 SMM_API ISmmPlugin* Plugify_ISmmPlugin() {
-	return mm::g_PLAPI;
+	return g_PLAPI;
 }
 
 SMM_API PluginId Plugify_Id() {
-	return mm::g_PLID;
+	return g_PLID;
 }
 
 SMM_API SourceHook::ISourceHook* Plugify_SourceHook() {
-	return mm::g_SHPtr;
+	return g_SHPtr;
 }
-/*
-struct CSourceHookFriend {
-	typedef CHookIDManager CSourceHookImpl::* type;
-	friend type get(CSourceHookFriend);
-};
 
-template<typename Tag, typename Tag::type M>
-struct CSourceHookAccessor {
-	friend typename Tag::type get(Tag) {
-		return M;
-	}
-};
-template struct CSourceHookAccessor<CSourceHookFriend, &CSourceHookImpl::m_HookIDMan>;
+SMM_API mm::HookManager* Plugify_CreateHook(void* iface, mm::DataType returnType, std::span<const mm::DataType> paramsType, void* function, int offset, bool post) {
+	return new mm::HookManager(iface, returnType, paramsType, function, offset, post);
+}
 
-struct CHookIDManagerFriend {
-	typedef CVector<CHookIDManager::Entry> CHookIDManager::* type;
-	friend type get(CHookIDManagerFriend);
-};
+SMM_API void Plugify_DeleteHook(mm::HookManager* hook) {
+	delete hook;
+}
 
-template<typename Tag, typename Tag::type M>
-struct CHookIDManagerAccessor {
-	friend typename Tag::type get(Tag) {
-		return M;
-	}
-};
-template struct CHookIDManagerAccessor<CHookIDManagerFriend, &CHookIDManager::m_Entries>;
+SMM_API void Plugify_HookSetRes(META_RES res) {
+	g_SHPtr->SetRes(res);
+}
 
-SMM_API bool Plugify_SourceHooked(void* vfnptr) {
-	const CSourceHookImpl& sh = *dynamic_cast<CSourceHookImpl*>(mm::g_SHPtr);
-	const CHookIDManager& hookIdManager = sh.*get(CSourceHookFriend());
-	for (const CHookIDManager::Entry& entry : hookIdManager.*get(CHookIDManagerFriend())) {
-		if (entry.vfnptr == vfnptr) {
-			//CONPRINT(std::format("Sourcehooked **vfnptr** was pathed: {}\n", vfnptr).c_str());
-			return true;
-		}
-	}
-	//CONPRINTE(std::format("**vfnptr** was not pathed!!!\n", vfnptr).c_str());
-	return false;
-}*/

@@ -53,8 +53,4 @@ namespace mm {
 		std::shared_ptr<plugify::IPlugify> m_context;
 		PlugifyState m_state{};
 	};
-
-	extern PlugifyPlugin g_Plugin;
-
-	PLUGIN_GLOBALVARS();
 }// namespace mm
