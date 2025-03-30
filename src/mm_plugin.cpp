@@ -560,7 +560,6 @@ namespace mm {
 
 				pluginManager->Terminate();
 				CONPRINT("Plugin manager was unloaded.\n");
-				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();
@@ -575,7 +574,6 @@ namespace mm {
 				}
 
 				pluginManager->Terminate();
-				//_FindOriginalAddr = nullptr;
 
 				if (auto packageManager = g_Plugin.m_context->GetPackageManager().lock()) {
 					packageManager->Reload();

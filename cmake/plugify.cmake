@@ -44,7 +44,7 @@ elseif(LINUX)
 			PLUGIFY_PLATFORM="linux"
 			PLUGIFY_BINARY="linuxsteamrt64"
 			PLUGIFY_ROOT_BINARY="/bin/linuxsteamrt64/"
-			PLUGIFY_GAME_BINARY="/bin/linuxsteamrt64/../../csgo/bin/linuxsteamrt64/" # Metamod hack
+			PLUGIFY_GAME_BINARY="/bin/linuxsteamrt64/../../csgo/bin/linuxsteamrt64//" # Metamod hack
 	)
 endif()
 
