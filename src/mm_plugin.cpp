@@ -134,7 +134,7 @@ namespace mm {
 			CONPRINTE(std::format("Conversion error: {}\n", e.what()).c_str());
 		}
 
-		return ptrdiff_t(-1);
+		return -1;
 	}
 
 	CON_COMMAND_F(plugify, "Plugify control options", FCVAR_NONE) {

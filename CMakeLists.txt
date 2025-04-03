@@ -1,6 +1,6 @@
 # mms2-plugify
-# Copyright (C) 2024 untrustedmodders
-# Licensed under the MIT license. See LICENSE file in the project root for details.
+# Copyright (C) 2023-2025 untrustedmodders
+# Licensed under the GPLv3 license. See LICENSE file in the project root for details.
 
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
@@ -8,11 +8,21 @@ if(POLICY CMP0092)
 	cmake_policy(SET CMP0092 NEW) # Don't add -W3 warning level by default.
 endif()
 
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" VERSION_FILE_CONTENTS)
+string(STRIP "${VERSION_FILE_CONTENTS}" VERSION_FILE_CONTENTS)
+set(MMS2_VERSION "${VERSION_FILE_CONTENTS}" CACHE STRING "Set version name")
+string(REPLACE "v" "" MMS2_VERSION "${MMS2_VERSION}")
+string(REGEX REPLACE "[.+-]" ";" MMS2_VERSION_LIST ${MMS2_VERSION})
+list(GET MMS2_VERSION_LIST 0 MMS2_VERSION_MAJOR)
+list(GET MMS2_VERSION_LIST 1 MMS2_VERSION_MINOR)
+list(GET MMS2_VERSION_LIST 2 MMS2_VERSION_PATCH)
+
 project(mms2-plugify
-	VERSION 1.0.0.0
-	DESCRIPTION "Plugify MMS2 Core"
-	HOMEPAGE_URL "https://github.com/untrustedmodders/mms2-plugify"
-	LANGUAGES C CXX
+		VERSION "${MMS2_VERSION_MAJOR}.${MMS2_VERSION_MINOR}.${MMS2_VERSION_PATCH}"
+		DESCRIPTION "Plugify MMS2 Core"
+		HOMEPAGE_URL "https://github.com/untrustedmodders/mms2-plugify"
+		LANGUAGES C CXX
 )
 
 string(REGEX REPLACE "^[^-]*-" "" PROJECT_NAME_SUBSTRING "${PROJECT_NAME}")
