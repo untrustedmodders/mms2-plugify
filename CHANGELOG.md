@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.11](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.10...v1.1.11) (2025-05-25)
+
+
+### Bug Fixes
+
+* add cmake versioning ([23a507b](https://github.com/untrustedmodders/mms2-plugify/commit/23a507b89d99454f0dd108136bc3f4eadd1deb55))
+* add new sourcehook methods for export ([a221c63](https://github.com/untrustedmodders/mms2-plugify/commit/a221c635e160796aef13e0cc136995e7fffddc22))
+* source2 path ([c20e01e](https://github.com/untrustedmodders/mms2-plugify/commit/c20e01ef47e5de3a2ee30dc449339489762c809b))
+* update deps ([47a62ab](https://github.com/untrustedmodders/mms2-plugify/commit/47a62aba6199778ef518d72806339e6ad95de4fb))
+* update int format ([f9f0501](https://github.com/untrustedmodders/mms2-plugify/commit/f9f050106d9b29840d77a7e6f18b83586d07fe53))
+* update modules ([b0fbfa9](https://github.com/untrustedmodders/mms2-plugify/commit/b0fbfa9cd512db77ef425f382bd0b4140dd2cfb2))
+* update plugify ([0048b43](https://github.com/untrustedmodders/mms2-plugify/commit/0048b43a7bcc0e0a52359904ed1479fa6ee3cbeb))
+
 ## [1.1.10](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.9...v1.1.10) (2025-03-27)
 
 
