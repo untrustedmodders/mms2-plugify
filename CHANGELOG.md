@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.12](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.11...v1.1.12) (2025-06-01)
+
+
+### Bug Fixes
+
+* remove exports for macos ([9908a35](https://github.com/untrustedmodders/mms2-plugify/commit/9908a35611fec9dbbf27abf838594a6f8854fc8d))
+
 ## [1.1.11](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.10...v1.1.11) (2025-05-25)
 
 
