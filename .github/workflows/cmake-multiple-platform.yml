@@ -80,7 +80,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: plugify-build-windows-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-windows_x64-${{ env.GITHUB_SHA_SHORT }}
           path: build/output/
 
   build_linux:
@@ -123,7 +123,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: plugify-build-linux-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-steamrt_x64-${{ env.GITHUB_SHA_SHORT }}
           path: build/output/
 
   publish:
@@ -142,18 +142,18 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: plugify-build-windows-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-windows_x64-${{ env.GITHUB_SHA_SHORT }}
           path: build/windows
 
       - uses: actions/download-artifact@v4
         with:
-          name: plugify-build-linux-${{ env.GITHUB_SHA_SHORT }}
+          name: plugify-build-steamrt_x64-${{ env.GITHUB_SHA_SHORT }}
           path: build/linux
 
       - name: Zip Builds
         run: |
-          (cd build/linux && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip *)
-          (cd build/windows && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip *)
+          (cd build/linux && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-steamrt_x64-${{ env.GITHUB_SHA_SHORT }}.zip *)
+          (cd build/windows && zip -qq -r ../../plugify-build-${{ env.BUILD_NUMBER }}-windows_x64-${{ env.GITHUB_SHA_SHORT }}.zip *)
 
       - name: Release
         id: release
@@ -161,8 +161,8 @@ jobs:
         with:
           tag_name: ${{ env.BUILD_NUMBER }}
           files: |
-            plugify-build-${{ env.BUILD_NUMBER }}-windows-${{ env.GITHUB_SHA_SHORT }}.zip
-            plugify-build-${{ env.BUILD_NUMBER }}-linux-${{ env.GITHUB_SHA_SHORT }}.zip
+            plugify-build-${{ env.BUILD_NUMBER }}-windows_x64-${{ env.GITHUB_SHA_SHORT }}.zip
+            plugify-build-${{ env.BUILD_NUMBER }}-steamrt_x64-${{ env.GITHUB_SHA_SHORT }}.zip
 
       - name: Send Notification to Discord
         env:
