@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.13](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.12...v1.1.13) (2025-06-26)
+
+
+### Bug Fixes
+
+* update plugify and sdk ([070aaf4](https://github.com/untrustedmodders/mms2-plugify/commit/070aaf40262aa00391fd79fdc36c158c627d9c89))
+
 ## [1.1.12](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.11...v1.1.12) (2025-06-26)
 
 
