@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.14](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.13...v1.1.14) (2025-07-13)
+
+
+### Bug Fixes
+
+* update plugify & sdk ([017964e](https://github.com/untrustedmodders/mms2-plugify/commit/017964e5e760c9f40ec84d4d7a324508491b9f0e))
+* update readme and add missing permission ([95dd61e](https://github.com/untrustedmodders/mms2-plugify/commit/95dd61e33616afa51fe6795dd54b0964dcbf5d9f))
+
 ## [1.1.13](https://github.com/untrustedmodders/mms2-plugify/compare/v1.1.12...v1.1.13) (2025-06-26)
 
 
